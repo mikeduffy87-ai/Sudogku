@@ -50,4 +50,4 @@ Bump `CACHE` in `sw.js` (currently `sudogku-toby-v24`) so installed copies updat
 - `sw.js` fetches the site's own files with `cache:'no-cache'` and is registered with `updateViaCache:'none'`, so merged updates reach phones on the next open instead of after GitHub Pages' ~10-minute HTTP cache.
 
 ## Splash screen
-- On each launch a Big Dave Gaming splash (Mike's own character) shows for ~1.8 s, tap to skip: `splash/background.jpg` (from `design/splash-background.png`) with `splash/big-dave.png` centred (badge cut from `design/big-dave-badge-source.png`, whose checkerboard was baked in; glow rebuilt in neon blue).
+- On each launch a Big Dave Gaming splash (Mike's own character) shows for ~1.8 s, tap to skip: `splash/background.jpg` (from `design/splash-background.png`) with `splash/big-dave.png` centred (from Mike's transparent badge `design/big-dave-badge.png`).
