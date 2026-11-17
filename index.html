@@ -9,6 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sudogku">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preload" as="image" href="splash/big-dave.webp" fetchpriority="high">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -203,14 +204,15 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 .panel img.mascot{object-fit:contain}
 @media(max-height:730px){.tobyHome{max-height:30vh}.homeMain{gap:8px}.homeLogo{max-height:64px}}
 #splash{position:fixed;inset:0;z-index:100;background:#02070f url(splash/background.jpg) center/cover no-repeat;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease}
-#splash img{width:min(84vw,52vh,460px);height:auto;opacity:0;transform:scale(.82);animation:splashIn .7s cubic-bezier(.2,1.4,.4,1) .15s forwards}
+#splash img{width:min(84vw,52vh,460px);height:auto;opacity:0;transform:scale(.82)}
+#splash.ready img{animation:splashIn .7s cubic-bezier(.2,1.4,.4,1) forwards}
 #splash.out{opacity:0;pointer-events:none}
 @keyframes splashIn{to{opacity:1;transform:scale(1)}}
 body.rm #splash img{animation:none;opacity:1;transform:none}
 </style>
 </head>
 <body>
-<div id="splash" role="img" aria-label="Big Dave Gaming presents Sudogku"><img src="splash/big-dave.png" alt=""></div>
+<div id="splash" role="img" aria-label="Big Dave Gaming presents Sudogku"><img src="splash/big-dave.webp" alt="" fetchpriority="high" decoding="async"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
 
 <div class="app">
@@ -233,28 +235,28 @@ body.rm #splash img{animation:none;opacity:1;transform:none}
     <div class="loading" id="loading"><svg viewBox="0 0 100 100"><use href="#bichon"/></svg>Fetching your puzzle…</div>
   </div>
   <div class="tools">
-    <button class="tool" id="btnFind"><span class="badge" id="findBadge">3</span><span class="circ"><img class="toolToby" src="toby/face-happy.png" alt=""></span>Find a Dog</button>
-    <button class="tool" id="btnHint"><span class="badge" id="hintBadge">3</span><span class="circ"><img class="toolToby" src="toby/act-hint.png" alt=""></span>Logic Hint</button>
-    <button class="tool" id="btnSniff"><span class="badge" id="sniffBadge">3</span><span class="circ"><img class="toolToby" src="toby/act-sniff.png" alt=""></span>Sniff Out</button>
+    <button class="tool" id="btnFind"><span class="badge" id="findBadge">3</span><span class="circ"><img class="toolToby" data-src="toby/face-happy.png" alt=""></span>Find a Dog</button>
+    <button class="tool" id="btnHint"><span class="badge" id="hintBadge">3</span><span class="circ"><img class="toolToby" data-src="toby/act-hint.png" alt=""></span>Logic Hint</button>
+    <button class="tool" id="btnSniff"><span class="badge" id="sniffBadge">3</span><span class="circ"><img class="toolToby" data-src="toby/act-sniff.png" alt=""></span>Sniff Out</button>
     <button class="tool" id="btnUndo"><span class="circ"><svg viewBox="0 0 48 48"><use href="#undo"/></svg></span>Undo</button>
   </div>
 </div>
 
 <div class="scrim" id="scrim"></div>
 <div class="hintCard" id="hintCard" role="dialog" aria-live="polite">
-  <div class="ht"><img src="toby/face-focused.png" alt="Toby thinking" style="width:48px;height:48px;flex-shrink:0"><p id="hintText"></p></div>
+  <div class="ht"><img data-src="toby/face-focused.png" alt="Toby thinking" style="width:48px;height:48px;flex-shrink:0"><p id="hintText"></p></div>
   <div class="btnrow"><button class="btn" id="hintClose">Close</button><button class="btn primary" id="hintApply">Apply</button></div>
 </div>
 
 <div class="overlay" id="ovWin"><div class="panel">
-  <img class="mascot bounce" id="winToby" src="toby/act-complete.png" alt="Toby celebrating">
+  <img class="mascot bounce" id="winToby" data-src="toby/act-complete.png" alt="Toby celebrating">
   <h2>Paw-some!</h2><p id="winText"></p>
   <div class="score-break" id="winBreak"></div>
   <div class="btnrow"><button class="btn" id="winStay">Admire</button><button class="btn primary" id="winNext">Next level</button></div>
 </div></div>
 
 <div class="overlay" id="ovLose"><div class="panel">
-  <img class="mascot" src="toby/act-oops.png" alt="Toby lost a bone" style="width:190px;height:150px;margin:-20px auto -16px">
+  <img class="mascot" data-src="toby/act-oops.png" alt="Toby lost a bone" style="width:190px;height:150px;margin:-20px auto -16px">
   <h2>Out of bones!</h2><p>No harm done. Start this puzzle fresh, or carry on with one extra bone for half points.</p>
   <div class="btnrow"><button class="btn" id="loseKeep">Keep going</button><button class="btn primary" id="loseRetry">Try again</button></div>
 </div></div>
@@ -263,8 +265,8 @@ body.rm #splash img{animation:none;opacity:1;transform:none}
   <div class="homeTop"><button class="round" id="homeHelp" aria-label="How to play"><span style="font-size:22px;font-weight:700;color:#754537">?</span></button>
     <button class="round" id="homeSettings" aria-label="Settings"><svg viewBox="0 0 24 24"><use href="#gear"/></svg></button></div>
   <div class="homeMain">
-    <img class="homeLogo" src="logo.png" alt="Sudogku">
-    <img class="tobyHome" src="toby-home.png" alt="Toby, the Sudogku mascot">
+    <img class="homeLogo" data-src="logo.webp" alt="Sudogku">
+    <img class="tobyHome" data-src="toby-home.webp" alt="Toby, the Sudogku mascot">
     <div class="homeStats"><div><small>Score</small><b id="hScore">0</b></div><div class="sep"></div><div><small>Solved</small><b id="hSolved">0</b></div></div>
     <button class="playBtn" id="homePlay"><span>Play</span><small id="hLevel">Level 1</small></button>
     <button class="dailyBtn" id="homeDaily"><span class="cal" id="hCal"></span><span class="dtxt"><b>Daily puzzle</b><small id="hDailySub"></small></span><span class="streak" id="hStreak"></span></button>
@@ -273,7 +275,7 @@ body.rm #splash img{animation:none;opacity:1;transform:none}
 </div>
 
 <div class="overlay" id="ovHelp"><div class="panel">
-  <img class="mascot" src="toby/face-happy.png" alt="Toby">
+  <img class="mascot" data-src="toby/face-happy.png" alt="Toby">
   <h2>How to play</h2>
   <ul class="howto">
     <li><span class="ic" id="hr1"></span><span>Place exactly <b>one dog</b> in every <b>row</b>, every <b>column</b> and every <b>colour</b>.</span></li>
@@ -1057,17 +1059,19 @@ $('btnRestart').onclick = () => {
 
 // ---------------- boot ----------------
 (function () {
-  const sp = document.getElementById('splash'); if (!sp) return;
-  let gone = false;
-  const hide = () => { if (gone) return; gone = true; sp.classList.add('out'); setTimeout(() => sp.remove(), 500); };
+  const sp = document.getElementById('splash'); if (!sp) { setTimeout(() => document.querySelectorAll('img[data-src]').forEach(i => { i.src = i.dataset.src; }), 0); return; }
+  let gone = false, rest = false;
+  // everything else waits until the badge is showing, so it gets the connection to itself
+  const loadRest = () => { if (rest) return; rest = true; document.querySelectorAll('img[data-src]').forEach(i => { i.src = i.dataset.src; i.removeAttribute('data-src'); }); window.dispatchEvent(new Event('splashready')); };
+  const hide = () => { loadRest(); if (gone) return; gone = true; sp.classList.add('out'); setTimeout(() => sp.remove(), 500); };
   sp.addEventListener('pointerdown', hide);
   const img = sp.querySelector('img');
-  const start = () => setTimeout(hide, 1800);
-  if (img.complete) start(); else { img.addEventListener('load', start); img.addEventListener('error', hide); setTimeout(hide, 4000); }
+  const start = () => { sp.classList.add('ready'); setTimeout(loadRest, 150); setTimeout(hide, 2000); };
+  if (img.complete) start(); else { img.addEventListener('load', start); img.addEventListener('error', hide); setTimeout(hide, 6000); }
 })();
 buildDefs();
-['toby/tile-head.png', 'toby/face-excited.png', 'toby/face-happy.png', 'toby/act-sniff.png'].forEach(src => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); });
-$('logo').innerHTML = '<img src="logo.png" alt="Sudogku">';
+addEventListener('splashready', () => ['toby/tile-head.png', 'toby/face-excited.png', 'toby/face-happy.png', 'toby/act-sniff.png'].forEach(src => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); }), { once: true });
+$('logo').innerHTML = '<img data-src="logo.webp" alt="Sudogku">';
 {
   const paw = (x, y, rot, sc) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})" fill="#E9C9B6"><ellipse cx="0" cy="5" rx="7" ry="6"/><circle cx="-8" cy="-3" r="3.2"/><circle cx="-3" cy="-8.5" r="3.2"/><circle cx="3" cy="-8.5" r="3.2"/><circle cx="8" cy="-3" r="3.2"/></g>`;
   const tile = `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220">${paw(40, 40, -20, 1.2)}${paw(170, 70, 25, 1)}${paw(90, 170, 10, 1.1)}</svg>`;

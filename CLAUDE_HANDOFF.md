@@ -9,15 +9,15 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - Three golden bones. Out of bones: Try again, or Keep going with one extra bone for half points.
 - **Starter dog only when needed** (like Meowdoku): a puzzle with an easy opening (a one-square colour, or a colour sitting in a single row/column) starts blank; otherwise it gets one locked starter dog. About 1 level in 10 gets one. Difficulty is graded from the actual starting board.
 - One long level track. **Daily puzzle** unlocks after level 20 (8×8, Hard), with streak and best time.
-- **Toby is ivory/white** (Ivory Edition colour correction of all `toby/` art, Nov 2026). Home hero `toby-home.png` and app icons are still the older cream colouring.
+- **Toby is ivory/white** (Ivory Edition colour correction of all `toby/` art, Nov 2026). Home hero `toby-home.webp` and app icons are still the older cream colouring.
 - **Mascot is Toby** (Mike's dog), from Mike's character sheet. Each sheet item is used where the sheet says (all in `toby/`, transparent PNGs). The expressions, action poses and tile head now come from Mike's clean separate render `design/toby-expressions.png` (transparent, row 1: sniff, hint, oops, happy, focused; row 2: excited, sorry, cheeky, tile head):
   - In-Game Icon (Tile) → `tile-head.png` (Toby's head lifted off the icon's lilac square): every placed dog, sitting on the square's own region colour.
   - Colour key above the board: each colour is a Toby-head silhouette (masked from `face-happy.png`) filled with that colour; when the colour has its dog it becomes the solid Happy face.
   - App / Game Icon → `icon-180/192/512.png`.
   - Happy → Find a Dog button, help screen, rule cards, loading. Focused (Thinking) → hint card. Excited (Win) → flashes for ~0.75 s on each correctly placed dog, then the normal tile head. Sorry (Mistake) → "bone cracked" toast. Cheeky → "Found one!" toast.
   - Sniff Out action → Sniff Out button and toast. Hint action → Logic Hint button. Puzzle Complete → level win (`act-complete.png`, cut from Mike's high-res render `design/toby-celebrate.png`). Lost a Bone → out-of-bones screen (`act-oops.png`, from Mike's render `design/toby-sad.png`). The Paw-some win screen always uses the full-body celebration, daily included.
-  - Home screen follows Mike's home design (`design/home-screen.png`): the wordmark above `toby-home.png` (sitting Toby with the lilac blob and paw prints, transparent background).
-  - `logo.png` is the purple Sudogku wordmark cut from `design/home-screen.png` (complete outline, no ribbon), used on the home screen and game header.
+  - Home screen follows Mike's home design (`design/home-screen.png`): the wordmark above `toby-home.webp` (sitting Toby with the lilac blob and paw prints, transparent background).
+  - `logo.webp` is the purple Sudogku wordmark cut from `design/home-screen.png` (complete outline, no ribbon), used on the home screen and game header.
 
 ## Difficulty (tier 1 Easy, 2 Medium, 3 Hard, 4 Expert, 5 Master)
 - Mix per level range: 1–2 Easy 100%; 3–5 Easy 40 / Medium 60; 6–15 Medium 75 / Hard 25; 16–30 Medium 45 / Hard 45 / Expert 10; 31–50 Medium 20 / Hard 50 / Expert 30; 51+ Medium 10 / Hard 30 / Expert 50 / Master 10.
@@ -37,7 +37,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v24`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v25`) so installed copies update.
 
 ## Performance notes (iPhone)
 - Avoid CSS `filter` (drop-shadow etc.) on anything that animates or repeats on the board; Safari redraws it every frame. Shadows are baked into the art (`toby/tile-head.png`) and into the ✕ symbol.
@@ -50,4 +50,5 @@ Bump `CACHE` in `sw.js` (currently `sudogku-toby-v24`) so installed copies updat
 - `sw.js` fetches the site's own files with `cache:'no-cache'` and is registered with `updateViaCache:'none'`, so merged updates reach phones on the next open instead of after GitHub Pages' ~10-minute HTTP cache.
 
 ## Splash screen
-- On each launch a Big Dave Gaming splash (Mike's own character) shows for ~1.8 s, tap to skip: `splash/background.jpg` (from `design/splash-background.png`) with `splash/big-dave.png` centred (from Mike's transparent badge `design/big-dave-badge.png`).
+- On each launch a Big Dave Gaming splash (Mike's own character) shows for ~1.8 s, tap to skip: `splash/background.jpg` (from `design/splash-background.png`) with `splash/big-dave.webp` centred (720px WebP, ~100 KB, preloaded so it beats the fog) (from Mike's transparent badge `design/big-dave-badge.png`).
+- Load order: the splash badge is preloaded first; home-screen images use `data-src` and the Toby warm-up waits for the `splashready` event, so the badge isn't slowed down on a cold start.
