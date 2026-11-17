@@ -73,6 +73,7 @@ body.nopat .tile{background-image:none!important}
 .tile .x{width:52%;height:52%}
 .tile .x.red{animation:pop .3s}
 .tile .dog{width:96%;height:96%;pointer-events:none;background:url(toby/tile-head.png) center/contain no-repeat;transform:translateZ(0)}
+.tile.joy .dog{background-image:url(toby/face-excited.png)}
 .tile.pop .dog{animation:pop .4s}
 .tile.sniffed{animation:sniffed .9s}
 @keyframes sniffed{0%{box-shadow:0 0 0 0 rgba(247,154,34,.9)}40%{box-shadow:0 0 0 4px rgba(247,154,34,.9)}100%{box-shadow:0 0 0 0 rgba(247,154,34,0)}}
@@ -241,7 +242,7 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 </div></div>
 
 <div class="overlay" id="ovLose"><div class="panel">
-  <img class="mascot" src="toby/act-oops.png" alt="Toby lost a bone">
+  <img class="mascot" src="toby/act-oops.png" alt="Toby lost a bone" style="width:190px;height:150px;margin:-20px auto -16px">
   <h2>Out of bones!</h2><p>No harm done. Start this puzzle fresh, or carry on with one extra bone for half points.</p>
   <div class="btnrow"><button class="btn" id="loseKeep">Keep going</button><button class="btn primary" id="loseRetry">Try again</button></div>
 </div></div>
@@ -700,7 +701,11 @@ function commit(changes, opts) {
         wrongOnes.forEach(i => { if (G.marks[i] === 2) { G.marks[i] = 1; if (!G.red) G.red = []; if (!G.red.includes(i)) G.red.push(i); } });
         paint(); saveGame();
       }, 650);
-    } else afterPaint(sfx.dog);
+    } else {
+      afterPaint(sfx.dog);
+      // a correct dog briefly laughs (Excited face), then settles into the normal Toby head
+      placedDogs.forEach(i => { const t = tiles[i]; t.classList.add('joy'); clearTimeout(t._joy); t._joy = setTimeout(() => t.classList.remove('joy'), 750); });
+    }
   } else if (!opts.silent) {
     const crossed = entry.some(([i]) => G.marks[i] === 1);
     afterPaint(crossed ? sfx.x : sfx.clear);
@@ -754,7 +759,6 @@ function checkWin() {
   sfx.win();
   $('winText').textContent = (G.kind === 'daily' ? `Daily puzzle for ${prettyDay(G.key)} done` : `Level ${G.key} done`) + ` in ${fmtTime(G.elapsed)}` + (!G.hints && !G.finds ? ', all by yourself!' : '.') + extra;
   $('winNext').textContent = G.kind === 'daily' ? 'Home' : 'Next level';
-  $('winToby').src = G.kind === 'daily' ? 'toby/face-excited.png' : 'toby/act-complete.png';
   if (G.kind === 'level' && G.key + 1 === DAILY_UNLOCK) setTimeout(() => toast('Daily puzzles unlocked! Find them on the home screen 🐾'), 2500);
   $('winBreak').innerHTML = lines.map(([k, v]) => `<div><span>${k}</span><span>${v > 0 ? '+' : ''}${v}</span></div>`).join('') + `<div class="tot"><span>Total</span><span>+${total}</span></div>`;
   if (solvedCount === 5 && settings.rules) { settings.rules = false; store.set('settings', settings); updateRulesBar(); setTimeout(() => toast('Rules bar tucked away. Bring it back in Settings.'), 1800); }
@@ -1032,7 +1036,7 @@ $('btnRestart').onclick = () => {
 
 // ---------------- boot ----------------
 buildDefs();
-['toby/tile-head.png', 'toby/face-happy.png', 'toby/act-sniff.png'].forEach(src => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); });
+['toby/tile-head.png', 'toby/face-excited.png', 'toby/face-happy.png', 'toby/act-sniff.png'].forEach(src => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); });
 $('logo').innerHTML = '<img src="logo.png" alt="Sudogku">';
 {
   const paw = (x, y, rot, sc) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})" fill="#E9C9B6"><ellipse cx="0" cy="5" rx="7" ry="6"/><circle cx="-8" cy="-3" r="3.2"/><circle cx="-3" cy="-8.5" r="3.2"/><circle cx="3" cy="-8.5" r="3.2"/><circle cx="8" cy="-3" r="3.2"/></g>`;
