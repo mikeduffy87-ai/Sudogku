@@ -55,7 +55,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:8px;fle
 .boardArea{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
 .frame{background:var(--card);border-radius:22px;box-shadow:0 6px 22px rgba(117,69,55,.16);padding:8px;position:relative;z-index:6}
 .strip{display:grid;gap:var(--gap);margin-bottom:6px;padding:0 1px}
-.strip .head{display:flex;justify-content:center;align-items:flex-end;filter:drop-shadow(0 1px 1px rgba(117,69,55,.4))}
+.strip .head{display:flex;justify-content:center;align-items:flex-end}
 .strip .sil,.strip .face{width:min(100%,40px);aspect-ratio:1;display:block}
 .strip .sil{-webkit-mask:url(toby/face-happy.png) center/contain no-repeat;mask:url(toby/face-happy.png) center/contain no-repeat}
 .strip .face{display:none;object-fit:contain}
@@ -70,9 +70,9 @@ header{display:flex;align-items:center;justify-content:space-between;gap:8px;fle
   background-repeat:no-repeat;background-position:center;background-size:58% 58%;transition:filter .2s;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
 body.nopat .tile{background-image:none!important}
 .tile svg{pointer-events:none}
-.tile .x{width:52%;height:52%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
-.tile .x.red{filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));animation:pop .3s}
-.tile .dog{width:94%;height:94%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 1.5px 2px rgba(117,69,55,.35))}
+.tile .x{width:52%;height:52%}
+.tile .x.red{animation:pop .3s}
+.tile .dog{width:96%;height:96%;pointer-events:none;background:url(toby/tile-head.png) center/contain no-repeat;transform:translateZ(0)}
 .tile.pop .dog{animation:pop .4s}
 .tile.sniffed{animation:sniffed .9s}
 @keyframes sniffed{0%{box-shadow:0 0 0 0 rgba(247,154,34,.9)}40%{box-shadow:0 0 0 4px rgba(247,154,34,.9)}100%{box-shadow:0 0 0 0 rgba(247,154,34,0)}}
@@ -338,7 +338,7 @@ function buildDefs() {
   const boneShape = (fillAttrs) => `<circle cx="11" cy="10" r="8" ${fillAttrs}/><circle cx="11" cy="20" r="8" ${fillAttrs}/><circle cx="49" cy="10" r="8" ${fillAttrs}/><circle cx="49" cy="20" r="8" ${fillAttrs}/><rect x="11" y="9" width="38" height="12" rx="3" ${fillAttrs}/>`;
   const bone = `<symbol id="bone" viewBox="0 0 60 30">${boneShape('fill="#A8671E" stroke="#A8671E" stroke-width="3.5"')}${boneShape('fill="#F7C548"')}
     <path d="M14 7.5h3M45 7.5h-3M17 12.5h26" stroke="#FFE7A0" stroke-width="2.2" stroke-linecap="round"/></symbol>`;
-  const xmark = `<symbol id="xmark" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="4.2" stroke-linecap="round"/></symbol>`;
+  const xmark = `<symbol id="xmark" viewBox="0 0 24 24"><path d="M5 6l14 14M19 6L5 20" stroke="#000" stroke-opacity=".16" stroke-width="4.6" stroke-linecap="round"/><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="4.2" stroke-linecap="round"/></symbol>`;
   const icons = `
     <symbol id="paw" viewBox="0 0 24 24"><g fill="${COCOA}"><ellipse cx="12" cy="15.5" rx="4.6" ry="3.9"/><circle cx="6.4" cy="10.4" r="2.1"/><circle cx="10" cy="6.8" r="2.1"/><circle cx="14" cy="6.8" r="2.1"/><circle cx="17.6" cy="10.4" r="2.1"/></g></symbol>
     <symbol id="gear" viewBox="0 0 24 24"><path fill="${COCOA}" d="M10.3 2h3.4l.5 2.6 1.7.8 2.2-1.5 2.4 2.4-1.5 2.2.8 1.7 2.6.5v3.4l-2.6.5-.8 1.7 1.5 2.2-2.4 2.4-2.2-1.5-1.7.8-.5 2.6h-3.4l-.5-2.6-1.7-.8-2.2 1.5-2.4-2.4 1.5-2.2-.8-1.7L2 13.7v-3.4l2.6-.5.8-1.7-1.5-2.2 2.4-2.4 2.2 1.5 1.7-.8zM12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2z"/></symbol>
@@ -530,8 +530,20 @@ function newGameFrom(p) {
   return { kind: p.kind, key: p.key, n: p.n, regions: p.regions, sol: p.sol, colours: p.colours, tier: p.tier, requestedTier: p.requestedTier, difficultyMatched: p.difficultyMatched, starters: p.starters || [],
     marks, history: [], bones: 3, finds: 0, hints: 0, sniffs: 0, red: [], continued: false, done: false, elapsed: 0 };
 }
-function saveGame() { if (G) store.set('game_' + G.kind, G); }
+// Saves are batched: written ~250ms after the last change (and at once when the app is hidden).
+let pendingSave = null, saveTimer = 0;
+function flushSave() { clearTimeout(saveTimer); if (pendingSave) { store.set('game_' + pendingSave.kind, pendingSave); pendingSave = null; } }
+function saveGame() {
+  if (!G) return;
+  if (pendingSave && pendingSave !== G) flushSave();
+  pendingSave = G; clearTimeout(saveTimer); saveTimer = setTimeout(flushSave, 250);
+}
+addEventListener('pagehide', flushSave);
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushSave(); });
+// Run sounds and other non-visual work just after the next frame has been drawn.
+const afterPaint = fn => requestAnimationFrame(() => setTimeout(fn, 0));
 async function loadGame(kind) {
+  flushSave();
   mode = kind; store.set('mode', kind);
   const key = kind === 'daily' ? todayKey() : level;
   const saved = store.get('game_' + kind, null);
@@ -616,20 +628,26 @@ function render() {
 function paint() {
   const bad = clashes(), n = G.n, active = bonesActive();
   const regionHasGoodDog = new Array(n).fill(false);
+  const hc = settings.highContrast ? 1 : 0;
   tiles.forEach((d, i) => {
     const m = G.marks[i];
     const red = m === 1 && isRed(i);
     const want = m === 2 ? 'dog' : m === 1 ? (red ? 'rx' : 'x') : '';
-    if (d.dataset.show !== want) {
-      d.dataset.show = want;
-      d.innerHTML = want === 'dog' ? '<img class="dog" src="toby/tile-head.png" alt="">'
-        : want === 'x' ? `<svg class="x" viewBox="0 0 24 24" style="color:${settings.highContrast ? '#3b2219' : '#fff'}"><use href="#xmark"/></svg>`
+    const wrong = m === 2 && active && !isSol(i);
+    const clash = m === 2 && !wrong && bad.has(i);
+    if (m === 2 && !wrong && !clash) regionHasGoodDog[G.regions[i]] = true;
+    // only touch squares whose look actually changed (much cheaper on iPhone)
+    const key = want + wrong + clash + hc;
+    if (d._k === key && d.dataset.show === want) return;
+    d._k = key;
+    if (d.dataset.show !== want || d._hc !== hc) {
+      d.dataset.show = want; d._hc = hc;
+      d.innerHTML = want === 'dog' ? '<span class="dog"></span>'
+        : want === 'x' ? `<svg class="x" viewBox="0 0 24 24" style="color:${hc ? '#3b2219' : '#fff'}"><use href="#xmark"/></svg>`
         : want === 'rx' ? '<svg class="x red" viewBox="0 0 24 24" style="color:#EE6A3A"><use href="#xmark"/></svg>' : '';
     }
-    const wrong = m === 2 && active && !isSol(i);
     d.classList.toggle('wrong', wrong);
-    d.classList.toggle('clash', m === 2 && !wrong && bad.has(i));
-    if (m === 2 && !wrong && !bad.has(i)) regionHasGoodDog[G.regions[i]] = true;
+    d.classList.toggle('clash', clash);
     const y = Math.floor(i / n), x = i % n;
     d.setAttribute('aria-label', `Row ${y + 1}, column ${x + 1}, ${NAMES[G.colours[G.regions[i]]]}, ${m === 2 ? 'dog' : red ? 'wrong guess, crossed out' : m === 1 ? 'crossed out' : 'empty'}`);
   });
@@ -638,10 +656,10 @@ function paint() {
   $('btnHint').disabled = G.done || !hintsLeft();
   $('btnFind').disabled = G.done || !findsLeft();
   $('btnSniff').disabled = G.done || !sniffsLeft();
-  $('sniffBadge').textContent = sniffsLeft(); $('sniffBadge').classList.toggle('empty', !sniffsLeft());
-  $('hintBadge').textContent = hintsLeft(); $('hintBadge').classList.toggle('empty', !hintsLeft());
-  $('findBadge').textContent = findsLeft(); $('findBadge').classList.toggle('empty', !findsLeft());
+  setBadge('sniffBadge', sniffsLeft()); setBadge('hintBadge', hintsLeft());
+  setBadge('findBadge', findsLeft());
 }
+function setBadge(id, v) { const b = $(id); if (b.textContent !== String(v)) b.textContent = v; b.classList.toggle('empty', !v); }
 function renderBones() {
   const b = $('bones');
   if (!bonesActive()) { b.className = 'bones relaxed'; b.textContent = '😌 Relaxed'; return; }
@@ -671,7 +689,7 @@ function commit(changes, opts) {
   // feedback
   if (placedDogs.length) {
     const wrongOnes = bonesActive() ? placedDogs.filter(i => !isSol(i)) : [];
-    placedDogs.forEach(i => { tiles[i].classList.remove('pop'); void tiles[i].offsetWidth; tiles[i].classList.add('pop'); });
+    placedDogs.forEach(i => { const t = tiles[i]; t.classList.remove('pop'); requestAnimationFrame(() => t.classList.add('pop')); });
     if (wrongOnes.length && !opts.noPenalty) {
       wrongOnes.forEach(i => { const t = tiles[i]; t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake'); });
       loseBone();
@@ -681,9 +699,10 @@ function commit(changes, opts) {
         wrongOnes.forEach(i => { if (G.marks[i] === 2) { G.marks[i] = 1; if (!G.red) G.red = []; if (!G.red.includes(i)) G.red.push(i); } });
         paint(); saveGame();
       }, 650);
-    } else sfx.dog();
+    } else afterPaint(sfx.dog);
   } else if (!opts.silent) {
-    entry.some(([i]) => G.marks[i] === 1) ? sfx.x() : sfx.clear();
+    const crossed = entry.some(([i]) => G.marks[i] === 1);
+    afterPaint(crossed ? sfx.x : sfx.clear);
   }
   saveGame();
   checkWin();
@@ -729,7 +748,7 @@ function checkWin() {
     store.set('daily', daily);
     extra = ` Streak: ${daily.streak} day${daily.streak === 1 ? '' : 's'} 🔥` + (newBest ? ' New best time!' : '');
   }
-  saveGame(); paint();
+  saveGame(); flushSave(); paint();
   $('scoreNum').textContent = score.toLocaleString();
   sfx.win();
   $('winText').textContent = (G.kind === 'daily' ? `Daily puzzle for ${prettyDay(G.key)} done` : `Level ${G.key} done`) + ` in ${fmtTime(G.elapsed)}` + (!G.hints && !G.finds ? ', all by yourself!' : '.') + extra;
@@ -1012,6 +1031,7 @@ $('btnRestart').onclick = () => {
 
 // ---------------- boot ----------------
 buildDefs();
+['toby/tile-head.png', 'toby/face-happy.png', 'toby/act-sniff.png'].forEach(src => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); });
 $('logo').innerHTML = '<img src="logo.png" alt="Sudogku">';
 {
   const paw = (x, y, rot, sc) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})" fill="#E9C9B6"><ellipse cx="0" cy="5" rx="7" ry="6"/><circle cx="-8" cy="-3" r="3.2"/><circle cx="-3" cy="-8.5" r="3.2"/><circle cx="3" cy="-8.5" r="3.2"/><circle cx="8" cy="-3" r="3.2"/></g>`;
