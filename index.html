@@ -116,8 +116,12 @@ body.hinting .hintCard{display:block;animation:up .25s}
 
 /* toolbar */
 .tools{display:flex;justify-content:space-around;flex-shrink:0;padding-top:2px;margin-bottom:auto}
-.tool{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:13px;font-weight:600;min-width:0;flex:1;white-space:nowrap}
-.tool{--circ:clamp(44px,13vw,60px)}
+.tool{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:12.5px;font-weight:600;min-width:0;flex:1;white-space:nowrap}
+.tool{--circ:clamp(44px,12.5vw,56px)}
+.tool.armed .circ{background:#E24B3B;box-shadow:0 0 0 3px rgba(226,75,59,.25)}
+#btnRestartTool svg{color:#754537}
+#btnRestartTool.armed svg{color:#fff}
+.tool.armed{color:#E24B3B}
 .tool .circ{width:var(--circ);height:var(--circ);border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:transform .1s}
 .tool:active .circ{transform:scale(.92)}
 .tool .circ svg{width:40px;height:40px}
@@ -194,7 +198,7 @@ body.hinting .hintCard{display:block;animation:up .25s}
 .toast img{width:36px;height:36px;object-fit:contain;margin:-6px 0}
 .foot{font-size:12px;color:var(--ink2);margin-top:12px}
 body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition:none!important}
-@media (max-height:720px){.logo{height:48px}.round{width:40px;height:40px}.stat b{font-size:20px}.tool{--circ:52px}.tool .circ svg{width:34px;height:34px}.rule svg{width:28px;height:28px}.rule{font-size:11px;padding:4px 6px}}
+@media (max-height:720px){.logo{height:48px}.round{width:40px;height:40px}.stat b{font-size:20px}.tool{--circ:48px}.tool .circ svg{width:34px;height:34px}.rule svg{width:28px;height:28px}.rule{font-size:11px;padding:4px 6px}}
 @media (max-height:620px){.rules{display:none}}
 /* Toby mascot artwork adapted from the approved character sheet */
 .tobyHome{width:min(86%,340px);max-height:38vh;object-fit:contain;margin-top:-4px}
@@ -240,6 +244,7 @@ body.rm #splash img{animation:none;opacity:1;transform:none}
     <button class="tool" id="btnHint"><span class="badge" id="hintBadge">3</span><span class="circ"><img class="toolToby" data-src="toby/act-hint.png" alt=""></span>Logic Hint</button>
     <button class="tool" id="btnSniff"><span class="badge" id="sniffBadge">3</span><span class="circ"><img class="toolToby" data-src="toby/act-sniff.png" alt=""></span>Sniff Out</button>
     <button class="tool" id="btnUndo"><span class="circ"><svg viewBox="0 0 48 48"><use href="#undo"/></svg></span>Undo</button>
+    <button class="tool" id="btnRestartTool"><span class="circ"><svg viewBox="0 0 48 48"><use href="#restart"/></svg></span><span id="restartLabel">Restart</span></button>
   </div>
 </div>
 
@@ -371,6 +376,7 @@ function buildDefs() {
       <ellipse cx="21.2" cy="22.5" rx="2.6" ry="3.3" fill="#000" opacity=".6"/><ellipse cx="30.8" cy="22.5" rx="2.6" ry="3.3" fill="#000" opacity=".6"/>
       <ellipse cx="23" cy="16.6" rx="4.4" ry="1.7" fill="#fff" opacity=".45"/>
       <circle cx="38" cy="36" r="8" fill="#F79A22" stroke="#fff" stroke-width="2"/><path d="M34.8 32.8l6.4 6.4M41.2 32.8l-6.4 6.4" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></symbol>
+    <symbol id="restart" viewBox="0 0 48 48"><path d="M36.5 18A14 14 0 1 0 38 27" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M38.5 8.5v10h-10" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="undo" viewBox="0 0 48 48"><path d="M14 16h15a10 10 0 0 1 0 20H18" fill="none" stroke="${COCOA}" stroke-width="5" stroke-linecap="round"/><path d="M20 7l-9 9 9 9" fill="none" stroke="${COCOA}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></symbol>`;
   $('defs').innerHTML = bichon + puff + bone + xmark + icons;
 }
@@ -1052,6 +1058,13 @@ function buildSettings() {
 $('btnSettings').onclick = () => { buildSettings(); resetRestartBtn(); show('ovSettings'); };
 $('btnHow').onclick = () => { hide('ovSettings'); show('ovHelp'); };
 let restartArmed = false, restartTimer;
+let toolArmed = false, toolTimer;
+function disarmRestartTool() { toolArmed = false; $('btnRestartTool').classList.remove('armed'); $('restartLabel').textContent = 'Restart'; }
+$('btnRestartTool').onclick = () => {
+  if (!G) return;
+  if (!toolArmed) { toolArmed = true; $('btnRestartTool').classList.add('armed'); $('restartLabel').textContent = 'Tap again'; clearTimeout(toolTimer); toolTimer = setTimeout(disarmRestartTool, 3000); return; }
+  clearTimeout(toolTimer); disarmRestartTool(); clearHint(); restartGame(); toast('Fresh start on this puzzle', 'face-happy');
+};
 function resetRestartBtn() { restartArmed = false; $('btnRestart').textContent = 'Restart puzzle'; }
 $('btnRestart').onclick = () => {
   if (!restartArmed) { restartArmed = true; $('btnRestart').textContent = 'Tap again to confirm'; clearTimeout(restartTimer); restartTimer = setTimeout(resetRestartBtn, 3000); return; }
