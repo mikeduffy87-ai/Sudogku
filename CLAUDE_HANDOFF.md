@@ -24,7 +24,8 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - Verified: levels 1–200 all matched their requested tier, 0 fallbacks, 0 Easy from level 6, all unique. Generation time median ~50 ms, p95 ~2 s, worst ~9 s (big boards); the next level is prefetched in the background.
 
 ## Sniff Out
-- `sniffCells` in the engine: up to 3 empty non-solution squares, preferring ones not already ruled out by placed dogs, spread over different colours and rows. One undoable action. Own nose icon (not the Bichon).
+- `sniffCells` in the engine: up to 3 empty non-solution squares, preferring ones not already ruled out by placed dogs, spread over different colours and rows. One undoable action.
+- Animation: Toby's Sniff Out pose pops onto the board and hops between the squares (nearest-first path), flipping to face his direction; each ✕ pops in with a sniff sound as he arrives. Skipped when Reduced motion is on.
 
 ## Screens
 - Bichon **home screen** on launch (logo, score/solved, Play · Level N, Daily card, help, settings). Back arrow in the game header returns home.
@@ -34,4 +35,4 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v11`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v12`) so installed copies update.
