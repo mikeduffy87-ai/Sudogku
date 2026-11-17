@@ -37,7 +37,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v25`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v26`) so installed copies update.
 
 ## Performance notes (iPhone)
 - Avoid CSS `filter` (drop-shadow etc.) on anything that animates or repeats on the board; Safari redraws it every frame. Shadows are baked into the art (`toby/tile-head.png`) and into the ✕ symbol.
@@ -52,3 +52,4 @@ Bump `CACHE` in `sw.js` (currently `sudogku-toby-v25`) so installed copies updat
 ## Splash screen
 - On each launch a Big Dave Gaming splash (Mike's own character) shows for ~1.8 s, tap to skip: `splash/background.jpg` (from `design/splash-background.png`) with `splash/big-dave.webp` centred (720px WebP, ~100 KB, preloaded so it beats the fog) (from Mike's transparent badge `design/big-dave-badge.png`).
 - Load order: the splash badge is preloaded first; home-screen images use `data-src` and the Toby warm-up waits for the `splashready` event, so the badge isn't slowed down on a cold start.
+- Animations kept snappy (Mike found them draggy): dog pop 0.28s, laugh 0.55s, red ✕ after 0.42s, win screen after 0.4s, Sniff Out ~1.2s, splash 1.5s. Hint dimming uses a `::before` overlay per tile, not CSS filters (slow in Safari).

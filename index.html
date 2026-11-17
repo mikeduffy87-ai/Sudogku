@@ -43,7 +43,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:8px;fle
 .bones{display:flex;gap:4px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:6px 12px}
 .bones svg{width:40px;height:21px;transition:transform .3s}
 .bones .cracked{filter:grayscale(1);opacity:.35}
-.bones .cracking{animation:crack .6s}
+.bones .cracking{animation:crack .45s}
 .bones.relaxed{font-size:13px;font-weight:600;padding:8px 14px}
 @keyframes crack{0%{transform:scale(1)}30%{transform:scale(1.35) rotate(-10deg)}60%{transform:scale(.9) rotate(8deg)}100%{transform:scale(1)}}
 
@@ -67,27 +67,27 @@ header{display:flex;align-items:center;justify-content:space-between;gap:8px;fle
 .strip .sil{-webkit-mask:url(toby/face-happy.png) center/contain no-repeat;mask:url(toby/face-happy.png) center/contain no-repeat}
 .strip .face{display:none;object-fit:contain}
 .strip .head.solved .sil{display:none}
-.strip .head.solved .face{display:block;animation:pop .45s}
+.strip .head.solved .face{display:block;animation:pop .22s}
 .grid{display:grid;gap:var(--gap);touch-action:none;position:relative}
-.sniffer{position:absolute;left:0;top:0;pointer-events:none;z-index:5;object-fit:contain;filter:drop-shadow(0 4px 5px rgba(117,69,55,.35));will-change:transform,opacity}
+.sniffer{position:absolute;left:0;top:0;pointer-events:none;z-index:5;object-fit:contain;will-change:transform,opacity}
 .tile.sniff-hide .x{opacity:0}
-.tile.sniff-show .x{animation:sniffpop .4s cubic-bezier(.3,1.6,.5,1)}
+.tile.sniff-show .x{animation:sniffpop .28s cubic-bezier(.3,1.6,.5,1)}
 @keyframes sniffpop{0%{transform:scale(0) rotate(-30deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
 .tile{position:relative;border-radius:calc(var(--tile) * .2);display:flex;align-items:center;justify-content:center;cursor:pointer;
-  background-repeat:no-repeat;background-position:center;background-size:58% 58%;transition:filter .2s;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
+  background-repeat:no-repeat;background-position:center;background-size:58% 58%;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
 body.nopat .tile{background-image:none!important}
 .tile svg{pointer-events:none}
 .tile .x{width:52%;height:52%}
 .tile .x.red{animation:pop .3s}
 .tile .dog{width:96%;height:96%;pointer-events:none;background:url(toby/tile-head.png) center/contain no-repeat;transform:translateZ(0)}
 .tile.joy .dog{background-image:url(toby/face-excited.png)}
-.tile.pop .dog{animation:pop .4s}
-.tile.sniffed{animation:sniffed .9s}
+.tile.pop .dog{animation:pop .28s}
+.tile.sniffed{animation:sniffed .6s}
 @keyframes sniffed{0%{box-shadow:0 0 0 0 rgba(247,154,34,.9)}40%{box-shadow:0 0 0 4px rgba(247,154,34,.9)}100%{box-shadow:0 0 0 0 rgba(247,154,34,0)}}
 .tile.wrong{box-shadow:inset 0 0 0 3px var(--red)}
 .tile.wrong::after{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(226,87,76,.35)}
 .tile.clash{box-shadow:inset 0 0 0 3px var(--red)}
-.tile.shake{animation:shake .45s}
+.tile.shake{animation:shake .35s}
 body.hc .tile{outline:1px solid rgba(60,30,20,.25)}
 body.hc .tile.rb-t{box-shadow:inset 0 3px 0 #3b2219}
 @keyframes pop{0%{transform:scale(.3)}65%{transform:scale(1.15)}100%{transform:scale(1)}}
@@ -96,9 +96,10 @@ body.hc .tile.rb-t{box-shadow:inset 0 3px 0 #3b2219}
 /* hint mode */
 .scrim{position:fixed;inset:0;background:rgba(70,38,28,.5);z-index:5;display:none}
 body.hinting .scrim{display:block}
-body.hinting .tile{filter:brightness(.55) saturate(.6)}
-body.hinting .tile.hl-p{filter:brightness(.92)}
-body.hinting .tile.hl-t{filter:none;box-shadow:0 0 0 3px var(--accent),0 0 14px 2px rgba(247,154,34,.85);z-index:2;animation:glow 1.2s infinite alternate}
+body.hinting .tile::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(40,20,14,.48);pointer-events:none}
+body.hinting .tile.hl-p::before{background:rgba(40,20,14,.1)}
+body.hinting .tile.hl-t::before{display:none}
+body.hinting .tile.hl-t{box-shadow:0 0 0 3px var(--accent),0 0 14px 2px rgba(247,154,34,.85);z-index:2;animation:glow 1.2s infinite alternate}
 @keyframes glow{to{box-shadow:0 0 0 3px #ffd08a,0 0 18px 4px rgba(247,154,34,.95)}}
 .hintCard{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 12px);width:min(540px,calc(100% - 24px));
   background:var(--card);border-radius:22px;padding:16px 16px 14px;z-index:7;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none}
@@ -205,7 +206,7 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 @media(max-height:730px){.tobyHome{max-height:30vh}.homeMain{gap:8px}.homeLogo{max-height:64px}}
 #splash{position:fixed;inset:0;z-index:100;background:#02070f url(splash/background.jpg) center/cover no-repeat;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease}
 #splash img{width:min(84vw,52vh,460px);height:auto;opacity:0;transform:scale(.82)}
-#splash.ready img{animation:splashIn .7s cubic-bezier(.2,1.4,.4,1) forwards}
+#splash.ready img{animation:splashIn .5s cubic-bezier(.2,1.4,.4,1) forwards}
 #splash.out{opacity:0;pointer-events:none}
 @keyframes splashIn{to{opacity:1;transform:scale(1)}}
 body.rm #splash img{animation:none;opacity:1;transform:none}
@@ -723,11 +724,11 @@ function commit(changes, opts) {
         if (G !== game) return;
         wrongOnes.forEach(i => { if (G.marks[i] === 2) { G.marks[i] = 1; if (!G.red) G.red = []; if (!G.red.includes(i)) G.red.push(i); } });
         paint(); saveGame();
-      }, 650);
+      }, 420);
     } else {
       afterPaint(sfx.dog);
       // a correct dog briefly laughs (Excited face), then settles into the normal Toby head
-      placedDogs.forEach(i => { const t = tiles[i]; t.classList.add('joy'); clearTimeout(t._joy); t._joy = setTimeout(() => t.classList.remove('joy'), 750); });
+      placedDogs.forEach(i => { const t = tiles[i]; t.classList.add('joy'); clearTimeout(t._joy); t._joy = setTimeout(() => t.classList.remove('joy'), 550); });
     }
   } else if (!opts.silent) {
     const crossed = entry.some(([i]) => G.marks[i] === 1);
@@ -744,7 +745,7 @@ function loseBone() {
   const svgs = $('bones').querySelectorAll('svg');
   if (svgs[G.bones]) { svgs[G.bones].classList.add('cracking'); }
   saveGame();
-  if (G.bones <= 0) setTimeout(() => show('ovLose'), 650);
+  if (G.bones <= 0) setTimeout(() => show('ovLose'), 450);
   else toast(G.bones === 1 ? 'Oops! Last bone left' : 'Oops! A bone cracked', 'face-sorry');
 }
 function undo() {
@@ -785,7 +786,7 @@ function checkWin() {
   if (G.kind === 'level' && G.key + 1 === DAILY_UNLOCK) setTimeout(() => toast('Daily puzzles unlocked! Find them on the home screen 🐾'), 2500);
   $('winBreak').innerHTML = lines.map(([k, v]) => `<div><span>${k}</span><span>${v > 0 ? '+' : ''}${v}</span></div>`).join('') + `<div class="tot"><span>Total</span><span>+${total}</span></div>`;
   if (solvedCount === 5 && settings.rules) { settings.rules = false; store.set('settings', settings); updateRulesBar(); setTimeout(() => toast('Rules bar tucked away. Bring it back in Settings.'), 1800); }
-  setTimeout(() => show('ovWin'), 700);
+  setTimeout(() => show('ovWin'), 400);
 }
 
 // ---------------- input: tap = ✕, double-tap = dog, drag = many ✕ ----------------
@@ -898,12 +899,12 @@ async function sniffAnimation(picks) {
   const reveal = i => { const t = tiles[i]; t.classList.remove('sniff-hide'); void t.offsetWidth; t.classList.add('sniff-show'); setTimeout(() => t.classList.remove('sniff-show'), 450); sfx.x(); };
   const sniff = async p => {
     sniffSound();
-    await run([{ transform: tf(p) }, { transform: tf(p, 'translateY(3px) rotate(4deg)') }, { transform: tf(p, 'translateY(-1px) rotate(-3deg)') }, { transform: tf(p, 'translateY(3px) rotate(4deg)') }, { transform: tf(p) }], 340);
+    await run([{ transform: tf(p) }, { transform: tf(p, 'translateY(3px) rotate(4deg)') }, { transform: tf(p, 'translateY(-1px) rotate(-3deg)') }, { transform: tf(p, 'translateY(3px) rotate(4deg)') }, { transform: tf(p) }], 220);
   };
   try {
     let cur = spot(picks[0], false);
     // pop up out of the board
-    await run([{ transform: tf(cur, 'translateY(18px) scale(.3)'), opacity: 0 }, { transform: tf(cur, 'scale(1.08)'), opacity: 1, offset: .7 }, { transform: tf(cur), opacity: 1 }], 300, 'ease-out');
+    await run([{ transform: tf(cur, 'translateY(18px) scale(.3)'), opacity: 0 }, { transform: tf(cur, 'scale(1.08)'), opacity: 1, offset: .7 }, { transform: tf(cur), opacity: 1 }], 200, 'ease-out');
     for (let k = 0; k < picks.length; k++) {
       if (G !== game) break;
       if (k > 0) {
@@ -913,14 +914,14 @@ async function sniffAnimation(picks) {
         if (flip !== (cur.f < 0)) { cur = spot(picks[k - 1], flip); img.animate([{ transform: tf(cur) }], { duration: 1, fill: 'forwards' }); }
         const arc = Math.max(24, tiles[0].offsetHeight * 0.7);
         const mid = { x: (cur.x + to.x) / 2, y: Math.min(cur.y, to.y) - arc, f: to.f };
-        await run([{ transform: tf(cur) }, { transform: tf(mid, 'rotate(-6deg)') }, { transform: tf(to, 'translateY(2px)') }, { transform: tf(to) }], 420);
+        await run([{ transform: tf(cur) }, { transform: tf(mid, 'rotate(-6deg)') }, { transform: tf(to, 'translateY(2px)') }, { transform: tf(to) }], 280);
         cur = to;
       }
       await sniff(cur);
       reveal(picks[k]);
-      await new Promise(r => setTimeout(r, 90));
+      await new Promise(r => setTimeout(r, 40));
     }
-    await run([{ transform: tf(cur), opacity: 1 }, { transform: tf(cur, 'translateY(14px) scale(.4)'), opacity: 0 }], 260, 'ease-in');
+    await run([{ transform: tf(cur), opacity: 1 }, { transform: tf(cur, 'translateY(14px) scale(.4)'), opacity: 0 }], 180, 'ease-in');
   } finally {
     picks.forEach(i => tiles[i] && tiles[i].classList.remove('sniff-hide'));
     img.remove();
@@ -1066,7 +1067,7 @@ $('btnRestart').onclick = () => {
   const hide = () => { loadRest(); if (gone) return; gone = true; sp.classList.add('out'); setTimeout(() => sp.remove(), 500); };
   sp.addEventListener('pointerdown', hide);
   const img = sp.querySelector('img');
-  const start = () => { sp.classList.add('ready'); setTimeout(loadRest, 150); setTimeout(hide, 2000); };
+  const start = () => { sp.classList.add('ready'); setTimeout(loadRest, 150); setTimeout(hide, 1500); };
   if (img.complete) start(); else { img.addEventListener('load', start); img.addEventListener('error', hide); setTimeout(hide, 6000); }
 })();
 buildDefs();
