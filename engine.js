@@ -424,21 +424,53 @@
   // Strict generation: search until the puzzle's grade equals the requested tier.
   // Every candidate puzzle is tried with each possible starter dog (the starter changes the grade).
   // Budgets are per board size; if a size can't deliver the tier, the next better-suited size is tried.
-  const TRY_BUDGET = { 5: 4000, 6: 4000, 7: 3000, 8: 2000, 9: 500, 10: 80, 11: 30 };
+  const TRY_BUDGET = { 5: 4000, 6: 4000, 7: 3000, 8: 2000, 9: 500, 10: 30, 11: 8 };
   // Sizes that tend to produce each tier (used when the level's own sizes can't).
   const TIER_SIZES = { 1: [5, 6, 7], 2: [6, 7, 8, 10], 3: [7, 8, 9, 10], 4: [8, 9, 11, 10, 7], 5: [9, 8, 10, 11] };
+  // A puzzle has an "easy opening" if the very first step from a blank board is simple:
+  // a colour with only one square, or a colour sitting entirely in one row/column (tier 1-2).
+  function hasEasyOpening(n, regions) {
+    const h = logicHint(geometry(n, regions), new Array(n * n).fill(0), 2);
+    return !!h && h.kind !== 'stuck' && h.tier <= 2;
+  }
+  // Like Meowdoku, a starter dog is only given when the puzzle has no easy opening.
+  function evaluate(n, p, tier, r, near) {
+    const options = hasEasyOpening(n, p.regions) ? [null]
+      : shuffle([...Array(n).keys()], r).map(sr => sr * n + p.sol[sr]);
+    for (const starter of options) {
+      const starters = starter == null ? [] : [starter];
+      const g = grade(n, p.regions, starters);
+      if (g === tier) return { n, sol: p.sol, regions: p.regions.slice(), tier: g, starters };
+      if (near && g < 99 && g >= near.minOk && (!near.best || Math.abs(g - tier) < Math.abs(near.best.tier - tier)))
+        near.best = { n, sol: p.sol, regions: p.regions.slice(), tier: g, starters };
+    }
+    return null;
+  }
+  // Nudge one non-dog square into a neighbouring colour, keeping colours connected and the solution unique.
+  function nudge(n, p, r) {
+    const g = p.regions, dogCells = new Set(p.sol.map((c, i) => i * n + c));
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const cell = Math.floor(r() * n * n);
+      if (dogCells.has(cell)) continue;
+      const ns = nbrs4(n, cell).filter(j => g[j] !== g[cell]);
+      if (!ns.length) continue;
+      const to = g[ns[Math.floor(r() * ns.length)]], from = g[cell];
+      if (!connectedWithout(n, g, from, cell)) continue;
+      g[cell] = to;
+      if (solveCount(n, g, p.sol, 2).count === 1) return true;
+      g[cell] = from;
+    }
+    return false;
+  }
+  const WALK = { 5: 0, 6: 0, 7: 4, 8: 8, 9: 16, 10: 30, 11: 40 };
   function searchSize(n, tier, r, budget, near) {
     for (let t = 0; t < budget; t++) {
       const p = generateUnique(n, r);
       if (!p) continue;
-      const rows = shuffle([...Array(n).keys()], r);
-      for (const sr of rows) {
-        const starter = sr * n + p.sol[sr];
-        const g = grade(n, p.regions, [starter]);
-        if (g === tier) return { n, sol: p.sol, regions: p.regions, tier: g, starters: [starter], tries: t + 1 };
-        if (near && g < 99 && g >= near.minOk && (!near.best || Math.abs(g - tier) < Math.abs(near.best.tier - tier)))
-          near.best = { n, sol: p.sol, regions: p.regions, tier: g, starters: [starter] };
-      }
+      let hit = evaluate(n, p, tier, r, near);
+      // walk through nearby unique puzzles: far cheaper than generating a new big board
+      for (let k = 0; !hit && k < WALK[n]; k++) if (nudge(n, p, r)) hit = evaluate(n, p, tier, r, near);
+      if (hit) { hit.tries = t + 1; return hit; }
     }
     return null;
   }
@@ -457,7 +489,7 @@
     if (!best && near.best) { best = near.best; fallback = 'nearest-tier'; }
     while (!best) { // practically unreachable: keep going until the hard rule is satisfied
       const n = spec.n, p = generateUnique(n, r), sr = Math.floor(r() * n), st = sr * n + p.sol[sr], g = grade(n, p.regions, [st]);
-      if (g >= minOk && g < 99) { best = { n, sol: p.sol, regions: p.regions, tier: g, starters: [st] }; fallback = 'any-allowed'; }
+      if (g >= minOk && g < 99) { best = { n, sol: p.sol, regions: p.regions, tier: g, starters: hasEasyOpening(n, p.regions) ? [] : [st] }; fallback = 'any-allowed'; }
     }
     best.colours = assignColours(best.n, best.regions, r);
     best.kind = kind; best.key = key;
@@ -467,7 +499,7 @@
     return best;
   }
 
-  const API = { sniffCells, tierForLevel, rng, hashSeed, generateUnique, solveCount, geometry, logicHint, playerHint, applyHint, grade, generateLevel, levelSpec, dailySpec, assignColours };
+  const API = { hasEasyOpening, sniffCells, tierForLevel, rng, hashSeed, generateUnique, solveCount, geometry, logicHint, playerHint, applyHint, grade, generateLevel, levelSpec, dailySpec, assignColours };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   else root.SudogkuEngine = API;
