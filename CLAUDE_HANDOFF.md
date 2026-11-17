@@ -14,7 +14,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
   - In-Game Icon (Tile) → `tile-head.png` (Toby's head lifted off the icon's lilac square): every placed dog, sitting on the square's own region colour.
   - Colour key above the board: each colour is a Toby-head silhouette (masked from `face-happy.png`) filled with that colour; when the colour has its dog it becomes the solid Happy face.
   - App / Game Icon → `icon-180/192/512.png`.
-  - Happy → Find a Dog button, help screen, rule cards, loading. Focused (Thinking) → hint card. Excited (Win) → flashes for ~0.75 s on each correctly placed dog, then the normal tile head. Sorry (Mistake) → "bone cracked" toast. Cheeky → "Found one!" toast.
+  - Happy → Find a Dog button, help screen, rule cards, loading. Focused (Thinking) → hint card. Excited (Win) → flashes for ~0.35 s on each correctly placed dog, then the normal tile head. Sorry (Mistake) → "bone cracked" toast. Cheeky → "Found one!" toast.
   - Sniff Out action → Sniff Out button and toast. Hint action → Logic Hint button. Puzzle Complete → level win (`act-complete.png`, cut from Mike's high-res render `design/toby-celebrate.png`). Lost a Bone → out-of-bones screen (`act-oops.png`, from Mike's render `design/toby-sad.png`). The Paw-some win screen always uses the full-body celebration, daily included.
   - Home screen follows Mike's home design (`design/home-screen.png`): the wordmark above `toby-home.webp` (sitting Toby with the lilac blob and paw prints, transparent background).
   - `logo.webp` is the purple Sudogku wordmark cut from `design/home-screen.png` (complete outline, no ribbon), used on the home screen and game header.
@@ -37,7 +37,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v26`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v27`) so installed copies update.
 
 ## Performance notes (iPhone)
 - Avoid CSS `filter` (drop-shadow etc.) on anything that animates or repeats on the board; Safari redraws it every frame. Shadows are baked into the art (`toby/tile-head.png`) and into the ✕ symbol.
@@ -52,4 +52,4 @@ Bump `CACHE` in `sw.js` (currently `sudogku-toby-v26`) so installed copies updat
 ## Splash screen
 - On each launch a Big Dave Gaming splash (Mike's own character) shows for ~1.8 s, tap to skip: `splash/background.jpg` (from `design/splash-background.png`) with `splash/big-dave.webp` centred (720px WebP, ~100 KB, preloaded so it beats the fog) (from Mike's transparent badge `design/big-dave-badge.png`).
 - Load order: the splash badge is preloaded first; home-screen images use `data-src` and the Toby warm-up waits for the `splashready` event, so the badge isn't slowed down on a cold start.
-- Animations kept snappy (Mike found them draggy): dog pop 0.28s, laugh 0.55s, red ✕ after 0.42s, win screen after 0.4s, Sniff Out ~1.2s, splash 1.5s. Hint dimming uses a `::before` overlay per tile, not CSS filters (slow in Safari).
+- Animations kept snappy (Mike found them draggy): dog pop 0.28s, laugh 0.35s, red ✕ after 0.42s, win screen after 0.4s, Sniff Out ~1.2s, splash 1.5s. Hint dimming uses a `::before` overlay per tile, not CSS filters (slow in Safari).
