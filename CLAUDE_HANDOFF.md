@@ -9,6 +9,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - Three golden bones. Out of bones: Try again, or Keep going with one extra bone for half points.
 - **Starter dog only when needed** (like Meowdoku): a puzzle with an easy opening (a one-square colour, or a colour sitting in a single row/column) starts blank; otherwise it gets one locked starter dog. About 1 level in 10 gets one. Difficulty is graded from the actual starting board.
 - One long level track. **Daily puzzle** unlocks after level 20 (8×8, Hard), with streak and best time.
+- **Toby is ivory/white** (Ivory Edition colour correction of all `toby/` art, Nov 2026). Home hero `toby-home.png` and app icons are still the older cream colouring.
 - **Mascot is Toby** (Mike's dog), from Mike's character sheet. Each sheet item is used where the sheet says (all in `toby/`, transparent PNGs). The expressions, action poses and tile head now come from Mike's clean separate render `design/toby-expressions.png` (transparent, row 1: sniff, hint, oops, happy, focused; row 2: excited, sorry, cheeky, tile head):
   - In-Game Icon (Tile) → `tile-head.png` (Toby's head lifted off the icon's lilac square): every placed dog, sitting on the square's own region colour.
   - Colour key above the board: each colour is a Toby-head silhouette (masked from `face-happy.png`) filled with that colour; when the colour has its dog it becomes the solid Happy face.
