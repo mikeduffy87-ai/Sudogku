@@ -202,9 +202,15 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 .tool .circ .toolToby{width:80%;height:80%;object-fit:contain}
 .panel img.mascot{object-fit:contain}
 @media(max-height:730px){.tobyHome{max-height:30vh}.homeMain{gap:8px}.homeLogo{max-height:64px}}
+#splash{position:fixed;inset:0;z-index:100;background:#02070f url(splash/background.jpg) center/cover no-repeat;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease}
+#splash img{width:min(84vw,52vh,460px);height:auto;opacity:0;transform:scale(.82);animation:splashIn .7s cubic-bezier(.2,1.4,.4,1) .15s forwards}
+#splash.out{opacity:0;pointer-events:none}
+@keyframes splashIn{to{opacity:1;transform:scale(1)}}
+body.rm #splash img{animation:none;opacity:1;transform:none}
 </style>
 </head>
 <body>
+<div id="splash" role="img" aria-label="Big Dave Gaming presents Sudogku"><img src="splash/big-dave.png" alt=""></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
 
 <div class="app">
@@ -1050,6 +1056,15 @@ $('btnRestart').onclick = () => {
 };
 
 // ---------------- boot ----------------
+(function () {
+  const sp = document.getElementById('splash'); if (!sp) return;
+  let gone = false;
+  const hide = () => { if (gone) return; gone = true; sp.classList.add('out'); setTimeout(() => sp.remove(), 500); };
+  sp.addEventListener('pointerdown', hide);
+  const img = sp.querySelector('img');
+  const start = () => setTimeout(hide, 1800);
+  if (img.complete) start(); else { img.addEventListener('load', start); img.addEventListener('error', hide); setTimeout(hide, 4000); }
+})();
 buildDefs();
 ['toby/tile-head.png', 'toby/face-excited.png', 'toby/face-happy.png', 'toby/act-sniff.png'].forEach(src => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); });
 $('logo').innerHTML = '<img src="logo.png" alt="Sudogku">';
@@ -1064,7 +1079,7 @@ applySettings();
 new ResizeObserver(() => layout()).observe($('boardArea').parentNode);
 window.addEventListener('resize', layout);
 document.addEventListener('gesturestart', e => e.preventDefault());
-if (!store.get('seenHelp', false)) { store.set('seenHelp', true); setTimeout(() => show('ovHelp'), 400); }
+if (!store.get('seenHelp', false)) { store.set('seenHelp', true); setTimeout(() => show('ovHelp'), 2500); }
 showHome();
 loadGame('level');
 
