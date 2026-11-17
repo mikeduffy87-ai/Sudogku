@@ -3,18 +3,19 @@
 Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (`index.html`) + engine (`engine.js`, also runs in a Web Worker).
 
 ## Product decisions (from Mike)
-- **3 uses per puzzle** for each tool: Find a Dog, Logic Hint, Sniff Out. Red badge counts down; button greys at 0. Restart refills. Undo does not refund a use.
+- **3 uses per puzzle** for each tool: Find a Dog, Logic Hint, Sniff Out. Small red badge on the button's top-right rim (must not cover the art) counts down; button greys at 0. Restart refills. Undo does not refund a use.
 - Single tap = ✕, tap again = clear, double tap = dog, drag = many ✕ (drag from a ✕ erases).
 - Correct dogs lock in place. A wrong dog shakes, cracks a bone, then becomes a **locked red ✕**.
 - Three golden bones. Out of bones: Try again, or Keep going with one extra bone for half points.
 - Every puzzle starts with one locked **starter dog**.
 - One long level track. **Daily puzzle** unlocks after level 20 (8×8, Hard), with streak and best time.
 - **Mascot is Toby** (Mike's dog), from Mike's character sheet. Each sheet item is used where the sheet says (all in `toby/`, transparent PNGs):
-  - In-Game Icon (Tile) → `tile.png`: every placed dog on the board.
+  - In-Game Icon (Tile) → `tile-head.png` (Toby's head lifted off the icon's lilac square): every placed dog, sitting on the square's own region colour.
+  - Colour key above the board: each colour is a Toby-head silhouette (masked from `face-happy.png`) filled with that colour; when the colour has its dog it becomes the solid Happy face.
   - App / Game Icon → `icon-180/192/512.png`.
   - Happy → Find a Dog button, help screen, rule cards, loading. Focused (Thinking) → hint card. Excited (Win) → daily-puzzle win. Sorry (Mistake) → "bone cracked" toast. Cheeky → "Found one!" toast.
   - Sniff Out action → Sniff Out button and toast. Hint action → Logic Hint button. Puzzle Complete → level win. Lost a Bone → out-of-bones screen.
-  - Home screen uses `toby-full.png` (full-body Toby). The bone logo (`logo.png`) is unchanged; the sheet's purple Sudogku wordmark is not used yet.
+  - Home screen uses `toby-full.png` (full-body Toby). `logo.png` is the sheet's purple Sudogku wordmark (paw in the "o"), used on the home screen and game header. On the sheet the ribbon overlaps its bottom edge, so the outline was rebuilt to a clean uniform rim.
 
 ## Difficulty (tier 1 Easy, 2 Medium, 3 Hard, 4 Expert, 5 Master)
 - Mix per level range: 1–2 Easy 100%; 3–5 Easy 40 / Medium 60; 6–15 Medium 75 / Hard 25; 16–30 Medium 45 / Hard 45 / Expert 10; 31–50 Medium 20 / Hard 50 / Expert 30; 51+ Medium 10 / Hard 30 / Expert 50 / Master 10.
@@ -23,7 +24,8 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - Verified: levels 1–200 all matched their requested tier, 0 fallbacks, 0 Easy from level 6, all unique. Generation time median ~50 ms, p95 ~2 s, worst ~9 s (big boards); the next level is prefetched in the background.
 
 ## Sniff Out
-- `sniffCells` in the engine: up to 3 empty non-solution squares, preferring ones not already ruled out by placed dogs, spread over different colours and rows. One undoable action. Own nose icon (not the Bichon).
+- `sniffCells` in the engine: up to 3 empty non-solution squares, preferring ones not already ruled out by placed dogs, spread over different colours and rows. One undoable action.
+- Animation: Toby's Sniff Out pose pops onto the board and hops between the squares (nearest-first path), flipping to face his direction; each ✕ pops in with a sniff sound as he arrives. Skipped when Reduced motion is on.
 
 ## Screens
 - Bichon **home screen** on launch (logo, score/solved, Play · Level N, Daily card, help, settings). Back arrow in the game header returns home.
@@ -33,4 +35,4 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v9`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v12`) so installed copies update.
