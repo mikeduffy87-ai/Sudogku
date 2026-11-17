@@ -29,7 +29,7 @@ button{font-family:inherit;color:inherit}
   padding:calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 12px);gap:8px}
 
 /* header */
-header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;margin-top:auto}
 .round{width:46px;height:46px;border-radius:50%;border:0;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .round svg{width:24px;height:24px}
 .logo{height:60px;flex:1;display:flex;justify-content:center;align-items:center;min-width:0}
@@ -52,7 +52,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:8px;fle
 .hide{display:none!important}
 
 /* board */
-.boardArea{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+.boardArea{flex:none;min-height:120px;display:flex;align-items:center;justify-content:center;position:relative}
 .frame{background:var(--card);border-radius:22px;box-shadow:0 6px 22px rgba(117,69,55,.16);padding:8px;position:relative;z-index:6}
 .strip{display:grid;gap:var(--gap);margin-bottom:6px;padding:0 1px}
 .strip .head{display:flex;justify-content:center;align-items:flex-end}
@@ -581,7 +581,13 @@ function layout() {
   if (!G) return;
   const area = $('boardArea'), n = G.n, pad = 16;
   const gap = Math.max(2, Math.round(7 - n * 0.4));
-  const availW = area.clientWidth - pad, availH = area.clientHeight - pad - 6;
+  // height left for the board = screen minus header, scores, rule cards and buttons
+  const app = area.parentNode, cs = getComputedStyle(app);
+  const rowGap = parseFloat(cs.rowGap) || 8;
+  const others = [...app.children].filter(el => el !== area && el.offsetParent !== null);
+  const used = others.reduce((t, el) => t + el.offsetHeight, 0) + rowGap * others.length;
+  const inner = app.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const availW = area.clientWidth - pad, availH = inner - used - pad - 6;
   // board side s, strip height ≈ (s/n)*0.78
   const s = Math.floor(Math.min(availW, availH - Math.min(46, availW / n * 0.8)));
   const tile = (s - gap * (n - 1)) / n;
@@ -590,6 +596,7 @@ function layout() {
   gr.style.setProperty('--tile', tile + 'px');
   $('frame').style.setProperty('--gap', gap + 'px');
   $('strip').style.width = s + 'px';
+  area.style.height = $('frame').offsetHeight + 'px';
 }
 function buildBoard() {
   const n = G.n, gr = $('grid'), st = $('strip');
@@ -670,6 +677,7 @@ function renderBones() {
 }
 function updateRulesBar() {
   $('rules').classList.toggle('hide', !settings.rules);
+  layout();
 }
 
 // ---------------- moves & history ----------------
@@ -1046,7 +1054,7 @@ $('logo').innerHTML = '<img src="logo.png" alt="Sudogku">';
 $('rules').innerHTML = [[1, '1 dog per colour'], [2, '1 dog per row &amp; column'], [3, "Dogs can't touch"]].map(([k, t]) => `<div class="rule">${miniRule(k)}<span>${t}</span></div>`).join('');
 $('hr1').innerHTML = miniRule(2); $('hr2').innerHTML = miniRule(3);
 applySettings();
-new ResizeObserver(layout).observe($('boardArea'));
+new ResizeObserver(() => layout()).observe($('boardArea').parentNode);
 window.addEventListener('resize', layout);
 document.addEventListener('gesturestart', e => e.preventDefault());
 if (!store.get('seenHelp', false)) { store.set('seenHelp', true); setTimeout(() => show('ovHelp'), 400); }

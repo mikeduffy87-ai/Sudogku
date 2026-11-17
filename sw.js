@@ -1,5 +1,5 @@
 // Sudogku service worker: works offline once installed.
-const CACHE = 'sudogku-toby-v18';
+const CACHE = 'sudogku-toby-v19';
 const FILES = ['./', 'index.html', 'engine.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'logo.png', 'toby-home.png', 'toby/tile.png', 'toby/tile-head.png', 'toby/face-happy.png', 'toby/face-focused.png', 'toby/face-excited.png', 'toby/face-sorry.png', 'toby/face-cheeky.png', 'toby/act-sniff.png', 'toby/act-hint.png', 'toby/act-complete.png', 'toby/act-oops.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
