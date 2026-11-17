@@ -37,7 +37,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v21`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v24`) so installed copies update.
 
 ## Performance notes (iPhone)
 - Avoid CSS `filter` (drop-shadow etc.) on anything that animates or repeats on the board; Safari redraws it every frame. Shadows are baked into the art (`toby/tile-head.png`) and into the ✕ symbol.
@@ -48,3 +48,6 @@ Bump `CACHE` in `sw.js` (currently `sudogku-toby-v21`) so installed copies updat
 - Meowdoku-style (Mike's picks): logo kept in the header; Level and Score centred together; bones on their own centred row; colour heads in a tab joined to the top of the board (curved fillets); board nearly edge to edge (6px side padding).
 - Header, scores and rule cards sit low, right above the board; the whole stack is centred vertically on tall phones (`header{margin-top:auto}` + `.tools{margin-bottom:auto}`). `layout()` sizes the board from the height left after the other rows, so there's no gap above or below it.
 - `sw.js` fetches the site's own files with `cache:'no-cache'` and is registered with `updateViaCache:'none'`, so merged updates reach phones on the next open instead of after GitHub Pages' ~10-minute HTTP cache.
+
+## Splash screen
+- On each launch a Big Dave Gaming splash (Mike's own character) shows for ~1.8 s, tap to skip: `splash/background.jpg` (from `design/splash-background.png`) with `splash/big-dave.png` centred (from Mike's transparent badge `design/big-dave-badge.png`).
