@@ -4,6 +4,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 
 ## Product decisions (from Mike)
 - **3 uses per puzzle** for each tool: Find a Dog, Logic Hint, Sniff Out. Small red badge on the button's top-right rim (must not cover the art) counts down; button greys at 0. Restart refills. Undo does not refund a use.
+- **Restart button** in the bottom toolbar (5th, after Undo): first tap turns it red with "Tap again"; a second tap within 3 s restarts the puzzle (also still in Settings).
 - Single tap = ✕, tap again = clear, double tap = dog, drag = many ✕ (drag from a ✕ erases).
 - Correct dogs lock in place. A wrong dog shakes, cracks a bone, then becomes a **locked red ✕**.
 - Three golden bones. Out of bones: Try again, or Keep going with one extra bone for half points.
@@ -37,7 +38,7 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v27`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v28`) so installed copies update.
 
 ## Performance notes (iPhone)
 - Avoid CSS `filter` (drop-shadow etc.) on anything that animates or repeats on the board; Safari redraws it every frame. Shadows are baked into the art (`toby/tile-head.png`) and into the ✕ symbol.
