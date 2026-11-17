@@ -728,7 +728,7 @@ function commit(changes, opts) {
     } else {
       afterPaint(sfx.dog);
       // a correct dog briefly laughs (Excited face), then settles into the normal Toby head
-      placedDogs.forEach(i => { const t = tiles[i]; t.classList.add('joy'); clearTimeout(t._joy); t._joy = setTimeout(() => t.classList.remove('joy'), 550); });
+      placedDogs.forEach(i => { const t = tiles[i]; t.classList.add('joy'); clearTimeout(t._joy); t._joy = setTimeout(() => t.classList.remove('joy'), 350); });
     }
   } else if (!opts.silent) {
     const crossed = entry.some(([i]) => G.marks[i] === 1);
