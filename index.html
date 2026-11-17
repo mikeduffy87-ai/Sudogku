@@ -156,7 +156,7 @@ body.hinting .hintCard{display:block;animation:up .25s}
 .home{position:fixed;inset:0;z-index:15;background:var(--bg);display:none;flex-direction:column;align-items:center;
   padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 10px) calc(env(safe-area-inset-left) + 14px);overflow:auto}
 .home.show{display:flex;animation:fade .25s}
-.home::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;background-image:var(--paws)}
+
 .homeTop{width:100%;max-width:520px;display:flex;justify-content:space-between;position:relative}
 .homeMain{flex:1;width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;position:relative}
 .homeLogo{width:min(92%,380px);height:auto}
@@ -187,13 +187,13 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 @media (max-height:720px){.logo{height:48px}.round{width:40px;height:40px}.stat b{font-size:20px}.tool{--circ:52px}.tool .circ svg{width:34px;height:34px}.rule svg{width:28px;height:28px}.rule{font-size:11px;padding:4px 6px}}
 @media (max-height:620px){.rules{display:none}}
 /* Toby mascot artwork adapted from the approved character sheet */
-.tobyHome{width:min(55%,205px);max-height:25vh;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(117,69,55,.18))}
+.tobyHome{width:min(86%,340px);max-height:38vh;object-fit:contain;margin-top:-4px}
 .panel img.mascot.tall{width:auto;height:120px}
 .homeMain{gap:12px}
 .homeLogo{max-height:96px;object-fit:contain}
 .tool .circ .toolToby{width:80%;height:80%;object-fit:contain}
 .panel img.mascot{object-fit:contain}
-@media(max-height:730px){.tobyHome{max-height:17vh}.homeMain{gap:8px}.homeLogo{max-height:70px}}
+@media(max-height:730px){.tobyHome{max-height:30vh}.homeMain{gap:8px}.homeLogo{max-height:64px}}
 </style>
 </head>
 <body>
@@ -250,7 +250,7 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
     <button class="round" id="homeSettings" aria-label="Settings"><svg viewBox="0 0 24 24"><use href="#gear"/></svg></button></div>
   <div class="homeMain">
     <img class="homeLogo" src="logo.png" alt="Sudogku">
-    <img class="tobyHome" src="toby-full.png" alt="Toby, the Sudogku mascot">
+    <img class="tobyHome" src="toby-home.png" alt="Toby, the Sudogku mascot">
     <div class="homeStats"><div><small>Score</small><b id="hScore">0</b></div><div class="sep"></div><div><small>Solved</small><b id="hSolved">0</b></div></div>
     <button class="playBtn" id="homePlay"><span>Play</span><small id="hLevel">Level 1</small></button>
     <button class="dailyBtn" id="homeDaily"><span class="cal" id="hCal"></span><span class="dtxt"><b>Daily puzzle</b><small id="hDailySub"></small></span><span class="streak" id="hStreak"></span></button>

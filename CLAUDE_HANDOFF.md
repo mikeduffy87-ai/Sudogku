@@ -15,7 +15,8 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
   - App / Game Icon → `icon-180/192/512.png`.
   - Happy → Find a Dog button, help screen, rule cards, loading. Focused (Thinking) → hint card. Excited (Win) → daily-puzzle win. Sorry (Mistake) → "bone cracked" toast. Cheeky → "Found one!" toast.
   - Sniff Out action → Sniff Out button and toast. Hint action → Logic Hint button. Puzzle Complete → level win. Lost a Bone → out-of-bones screen.
-  - Home screen uses `toby-full.png` (full-body Toby). `logo.png` is the sheet's purple Sudogku wordmark (paw in the "o"), used on the home screen and game header. On the sheet the ribbon overlaps its bottom edge, so the outline was rebuilt to a clean uniform rim.
+  - Home screen follows Mike's home design (`design/home-screen.png`): the wordmark above `toby-home.png` (sitting Toby with the lilac blob and paw prints, transparent background).
+  - `logo.png` is the purple Sudogku wordmark cut from `design/home-screen.png` (complete outline, no ribbon), used on the home screen and game header.
 
 ## Difficulty (tier 1 Easy, 2 Medium, 3 Hard, 4 Expert, 5 Master)
 - Mix per level range: 1–2 Easy 100%; 3–5 Easy 40 / Medium 60; 6–15 Medium 75 / Hard 25; 16–30 Medium 45 / Hard 45 / Expert 10; 31–50 Medium 20 / Hard 50 / Expert 30; 51+ Medium 10 / Hard 30 / Expert 50 / Master 10.
@@ -35,4 +36,4 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v12`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v13`) so installed copies update.
