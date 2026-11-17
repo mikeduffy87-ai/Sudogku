@@ -36,4 +36,10 @@ Ad-free, offline, dog-themed take on Meowdoku. Installable PWA. Single-file UI (
 - UI checked in desktop Chrome with simulated touch at 390×844 and 375×667. **Still needs a check on a real iPhone in Safari** (double-tap timing, drag, safe areas, offline update).
 
 ## When changing files
-Bump `CACHE` in `sw.js` (currently `sudogku-toby-v14`) so installed copies update.
+Bump `CACHE` in `sw.js` (currently `sudogku-toby-v15`) so installed copies update.
+
+## Performance notes (iPhone)
+- Avoid CSS `filter` (drop-shadow etc.) on anything that animates or repeats on the board; Safari redraws it every frame. Shadows are baked into the art (`toby/tile-head.png`) and into the ✕ symbol.
+- The placed dog is a CSS background on one shared, pre-decoded image, not a new `<img>` per square.
+- `paint()` only touches squares whose look changed; saves are batched (`saveGame` → `flushSave` after ~250 ms, and when the app is hidden); sounds play just after the frame is drawn (`afterPaint`).
+
