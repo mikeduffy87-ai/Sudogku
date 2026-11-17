@@ -102,6 +102,19 @@ for (const [kind, key] of [['level', 1], ['level', 15], ['level', 40], ['level',
   for (const L of [6, 9, 12, 33, 58]) { const p = E.generateLevel('level', L); ok(p.tier === p.requestedTier && p.tier >= 2, `strict tier L${L}`); }
 }
 
+// 6. Starter dog only when there's no easy opening (Meowdoku-style)
+{
+  let withStarter = 0, total = 0;
+  for (const L of [1, 3, 7, 12, 18, 27, 36, 44, 55, 66, 77, 88]) {
+    const p = E.generateLevel('level', L); total++;
+    const easy = E.hasEasyOpening(p.n, p.regions);
+    ok(easy ? p.starters.length === 0 : p.starters.length === 1, `starter rule L${L}`);
+    ok(p.tier === p.requestedTier, `tier still matched L${L}`);
+    if (p.starters.length) withStarter++;
+  }
+  console.log(`  starter dog on ${withStarter}/${total} sampled levels`);
+}
+
 console.log('hint kinds used:', JSON.stringify(kinds));
 console.log(`${checks - fails}/${checks} checks passed`);
 process.exit(fails ? 1 : 0);
