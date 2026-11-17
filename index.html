@@ -32,7 +32,7 @@ button{font-family:inherit;color:inherit}
 header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 .round{width:46px;height:46px;border-radius:50%;border:0;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .round svg{width:24px;height:24px}
-.logo{height:92px;flex:1;display:flex;justify-content:center;align-items:center;min-width:0}
+.logo{height:60px;flex:1;display:flex;justify-content:center;align-items:center;min-width:0}
 .logo img{height:100%;width:auto;max-width:100%;object-fit:contain}
 .stats{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding:0 6px}
 .stat{text-align:center;min-width:80px;line-height:1.05}
@@ -105,12 +105,13 @@ body.hinting .hintCard{display:block;animation:up .25s}
 /* toolbar */
 .tools{display:flex;justify-content:space-around;flex-shrink:0;padding-top:2px}
 .tool{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:13px;font-weight:600;min-width:0;flex:1;white-space:nowrap}
-.tool .circ{width:clamp(44px,13vw,60px);height:clamp(44px,13vw,60px);border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:transform .1s}
+.tool{--circ:clamp(44px,13vw,60px)}
+.tool .circ{width:var(--circ);height:var(--circ);border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:transform .1s}
 .tool:active .circ{transform:scale(.92)}
 .tool .circ svg{width:40px;height:40px}
 .tool:disabled{opacity:.4}
 .tool{position:relative}
-.badge{position:absolute;top:-4px;right:calc(50% - 34px);min-width:26px;height:26px;padding:0 7px;border-radius:13px;background:#E24B3B;color:#fff;font-weight:700;font-size:15px;line-height:26px;z-index:1;box-shadow:0 2px 4px rgba(0,0,0,.18)}
+.badge{position:absolute;top:-7px;left:calc(50% + var(--circ) / 2 - 13px);min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#E24B3B;color:#fff;font-weight:700;font-size:13px;line-height:22px;z-index:1;border:2px solid var(--bg);box-sizing:content-box;box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .badge.empty{background:#c9b8a8}
 
 /* overlays */
@@ -180,16 +181,16 @@ body.hinting .hintCard{display:block;animation:up .25s}
 .toast img{width:36px;height:36px;object-fit:contain;margin:-6px 0}
 .foot{font-size:12px;color:var(--ink2);margin-top:12px}
 body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition:none!important}
-@media (max-height:720px){.logo{height:64px}.round{width:40px;height:40px}.stat b{font-size:20px}.tool .circ{width:52px;height:52px}.tool .circ svg{width:34px;height:34px}.rule svg{width:28px;height:28px}.rule{font-size:11px;padding:4px 6px}}
+@media (max-height:720px){.logo{height:48px}.round{width:40px;height:40px}.stat b{font-size:20px}.tool{--circ:52px}.tool .circ svg{width:34px;height:34px}.rule svg{width:28px;height:28px}.rule{font-size:11px;padding:4px 6px}}
 @media (max-height:620px){.rules{display:none}}
 /* Toby mascot artwork adapted from the approved character sheet */
 .tobyHome{width:min(55%,205px);max-height:25vh;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(117,69,55,.18))}
 .panel img.mascot.tall{width:auto;height:120px}
 .homeMain{gap:12px}
-.homeLogo{max-height:105px;object-fit:contain}
-.tool .circ .toolToby{width:84%;height:84%;object-fit:contain}
+.homeLogo{max-height:96px;object-fit:contain}
+.tool .circ .toolToby{width:80%;height:80%;object-fit:contain}
 .panel img.mascot{object-fit:contain}
-@media(max-height:730px){.tobyHome{max-height:17vh}.homeMain{gap:8px}.homeLogo{max-height:75px}}
+@media(max-height:730px){.tobyHome{max-height:17vh}.homeMain{gap:8px}.homeLogo{max-height:70px}}
 </style>
 </head>
 <body>
