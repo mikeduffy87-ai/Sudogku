@@ -113,7 +113,7 @@ body.hinting .hintCard{display:block;animation:up .25s}
 .btn.primary:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent2)}
 
 /* toolbar */
-.tools{display:flex;justify-content:space-around;flex-shrink:0;padding-top:2px}
+.tools{display:flex;justify-content:space-around;flex-shrink:0;padding-top:2px;margin-bottom:auto}
 .tool{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:13px;font-weight:600;min-width:0;flex:1;white-space:nowrap}
 .tool{--circ:clamp(44px,13vw,60px)}
 .tool .circ{width:var(--circ);height:var(--circ);border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:transform .1s}
@@ -1068,7 +1068,7 @@ if (!store.get('seenHelp', false)) { store.set('seenHelp', true); setTimeout(() 
 showHome();
 loadGame('level');
 
-try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
+try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); })).catch(() => {}); } catch (e) {}
 </script>
 </body>
 </html>
