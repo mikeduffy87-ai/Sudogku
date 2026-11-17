@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Sudogku</title>
+<meta name="theme-color" content="#FAF3EC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sudogku">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#FAF3EC; --ink:#754537; --ink2:#a07a68; --card:#FFFBF6; --line:#ecdccb;
+  --accent:#F79A22; --accent2:#E5850E; --red:#E2574C; --shadow:0 3px 10px rgba(117,69,55,.14);
+  --font:"Fredoka",ui-rounded,"SF Pro Rounded",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);overscroll-behavior:none;overflow:hidden}
+body{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+}
+button{font-family:inherit;color:inherit}
+.app{height:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 12px);gap:8px}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.round{width:46px;height:46px;border-radius:50%;border:0;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.round svg{width:24px;height:24px}
+.logo{height:92px;flex:1;display:flex;justify-content:center;align-items:center;min-width:0}
+.logo img{height:100%;width:auto;max-width:100%;object-fit:contain}
+.stats{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding:0 6px}
+.stat{text-align:center;min-width:80px;line-height:1.05}
+.stat small{display:block;font-size:13px;font-weight:600;color:var(--ink2)}
+.stat b{font-size:24px;font-weight:700}
+.bones{display:flex;gap:4px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:6px 12px}
+.bones svg{width:40px;height:21px;transition:transform .3s}
+.bones .cracked{filter:grayscale(1);opacity:.35}
+.bones .cracking{animation:crack .6s}
+.bones.relaxed{font-size:13px;font-weight:600;padding:8px 14px}
+@keyframes crack{0%{transform:scale(1)}30%{transform:scale(1.35) rotate(-10deg)}60%{transform:scale(.9) rotate(8deg)}100%{transform:scale(1)}}
+
+/* rules bar */
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex-shrink:0}
+.rule{background:var(--card);border-radius:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;padding:6px 7px;font-size:12px;font-weight:600;line-height:1.15}
+.rule svg{width:34px;height:34px;flex-shrink:0}
+.hide{display:none!important}
+
+/* board */
+.boardArea{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+.frame{background:var(--card);border-radius:22px;box-shadow:0 6px 22px rgba(117,69,55,.16);padding:8px;position:relative;z-index:6}
+.strip{display:grid;gap:var(--gap);margin-bottom:6px;padding:0 1px}
+.strip .head{display:flex;justify-content:center;align-items:flex-end}
+.strip svg{width:min(100%,40px);height:auto;display:block;transition:transform .3s,opacity .3s}
+.strip .head{opacity:.5}
+.strip .head .face{display:none}
+.strip .head.solved{opacity:1}
+.strip .head.solved .face{display:inline}
+.strip .head.solved svg{animation:pop .45s}
+.grid{display:grid;gap:var(--gap);touch-action:none;position:relative}
+.tile{position:relative;border-radius:calc(var(--tile) * .2);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background-repeat:no-repeat;background-position:center;background-size:58% 58%;transition:filter .2s;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
+body.nopat .tile{background-image:none!important}
+.tile svg{pointer-events:none}
+.tile .x{width:52%;height:52%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.tile .x.red{filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));animation:pop .3s}
+.tile .dog{width:104%;height:104%;max-width:none;object-fit:contain;pointer-events:none;filter:drop-shadow(0 1px 2px rgba(80,50,120,.3))}
+.tile.pop .dog{animation:pop .4s}
+.tile.sniffed{animation:sniffed .9s}
+@keyframes sniffed{0%{box-shadow:0 0 0 0 rgba(247,154,34,.9)}40%{box-shadow:0 0 0 4px rgba(247,154,34,.9)}100%{box-shadow:0 0 0 0 rgba(247,154,34,0)}}
+.tile.wrong{box-shadow:inset 0 0 0 3px var(--red)}
+.tile.wrong::after{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(226,87,76,.35)}
+.tile.clash{box-shadow:inset 0 0 0 3px var(--red)}
+.tile.shake{animation:shake .45s}
+body.hc .tile{outline:1px solid rgba(60,30,20,.25)}
+body.hc .tile.rb-t{box-shadow:inset 0 3px 0 #3b2219}
+@keyframes pop{0%{transform:scale(.3)}65%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+/* hint mode */
+.scrim{position:fixed;inset:0;background:rgba(70,38,28,.5);z-index:5;display:none}
+body.hinting .scrim{display:block}
+body.hinting .tile{filter:brightness(.55) saturate(.6)}
+body.hinting .tile.hl-p{filter:brightness(.92)}
+body.hinting .tile.hl-t{filter:none;box-shadow:0 0 0 3px var(--accent),0 0 14px 2px rgba(247,154,34,.85);z-index:2;animation:glow 1.2s infinite alternate}
+@keyframes glow{to{box-shadow:0 0 0 3px #ffd08a,0 0 18px 4px rgba(247,154,34,.95)}}
+.hintCard{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 12px);width:min(540px,calc(100% - 24px));
+  background:var(--card);border-radius:22px;padding:16px 16px 14px;z-index:7;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none}
+body.hinting .hintCard{display:block;animation:up .25s}
+@keyframes up{from{transform:translate(-50%,20px);opacity:0}}
+.hintCard .ht{display:flex;gap:10px;align-items:flex-start}
+.hintCard .ht svg{width:38px;height:38px;flex-shrink:0}
+.hintCard p{margin:0;font-size:16px;line-height:1.4;font-weight:500}
+.cname{display:inline-block;padding:0 7px;border-radius:8px;font-weight:700;color:#4a2a20;line-height:1.35}
+.btnrow{display:flex;gap:8px;margin-top:12px}
+.btn{flex:1;border:0;border-radius:14px;padding:12px;font-size:16px;font-weight:700;background:#f1e5d8;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;box-shadow:0 3px 0 var(--accent2)}
+.btn.primary:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent2)}
+
+/* toolbar */
+.tools{display:flex;justify-content:space-around;flex-shrink:0;padding-top:2px}
+.tool{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:13px;font-weight:600;min-width:0;flex:1;white-space:nowrap}
+.tool .circ{width:clamp(44px,13vw,60px);height:clamp(44px,13vw,60px);border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:transform .1s}
+.tool:active .circ{transform:scale(.92)}
+.tool .circ svg{width:40px;height:40px}
+.tool:disabled{opacity:.4}
+.tool{position:relative}
+.badge{position:absolute;top:-4px;right:calc(50% - 34px);min-width:26px;height:26px;padding:0 7px;border-radius:13px;background:#E24B3B;color:#fff;font-weight:700;font-size:15px;line-height:26px;z-index:1;box-shadow:0 2px 4px rgba(0,0,0,.18)}
+.badge.empty{background:#c9b8a8}
+
+/* overlays */
+.overlay{position:fixed;inset:0;background:rgba(70,38,28,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+.overlay.show{display:flex;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.panel{background:var(--card);border-radius:26px;padding:20px;width:100%;max-width:400px;max-height:88vh;overflow:auto;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.panel h2{margin:2px 0 10px;font-size:26px}
+.panel p{margin:6px 0;line-height:1.45;font-weight:500}
+.panel .mascot{width:110px;height:110px;margin:-6px auto 2px;display:block;object-fit:contain}
+.panel .mascot.bounce{animation:bounce 1s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line);text-align:left;font-weight:600;font-size:16px}
+.toggle small{display:block;font-weight:500;font-size:12px;color:var(--ink2);margin-top:1px}
+.sw{position:relative;width:52px;height:30px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;background:#e5d6c6;border-radius:999px;transition:.2s}
+.sw span::before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.2s}
+.sw input:checked+span{background:var(--accent)}
+.sw input:checked+span::before{transform:translateX(22px)}
+.sw input:disabled+span{opacity:.4}
+.seg{display:flex;background:#efe2d4;border-radius:12px;padding:3px;gap:3px;flex-shrink:0}
+.seg button{border:0;background:none;padding:6px 10px;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.diffs{display:grid;gap:10px;margin-top:8px}
+.diff{border:0;border-radius:18px;padding:12px 14px;background:#f6ebdf;display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left;font-size:18px;font-weight:700}
+.diff small{display:block;font-size:13px;font-weight:500;color:var(--ink2)}
+.diff.on{background:var(--accent);color:#fff}
+.diff.on small{color:#fff3e0}
+.diff .lv{font-size:15px;font-weight:600}
+.diff:disabled{opacity:.55;cursor:default}
+.howto{text-align:left;padding-left:2px;list-style:none;margin:6px 0}
+.howto li{display:flex;gap:10px;align-items:center;margin:9px 0;font-weight:500;line-height:1.35}
+.howto li .ic{width:38px;height:38px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f6ebdf;font-size:20px}
+.howto li .ic svg{width:32px;height:32px}
+.score-break{background:#f6ebdf;border-radius:14px;padding:8px 12px;margin:10px 0;text-align:left;font-size:15px;font-weight:500}
+.score-break div{display:flex;justify-content:space-between;padding:2px 0}
+.score-break .tot{border-top:1px solid #e3d2bf;margin-top:4px;padding-top:6px;font-weight:700}
+.home{position:fixed;inset:0;z-index:15;background:var(--bg);display:none;flex-direction:column;align-items:center;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 10px) calc(env(safe-area-inset-left) + 14px);overflow:auto}
+.home.show{display:flex;animation:fade .25s}
+.home::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;background-image:var(--paws)}
+.homeTop{width:100%;max-width:520px;display:flex;justify-content:space-between;position:relative}
+.homeMain{flex:1;width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;position:relative}
+.homeLogo{width:min(92%,380px);height:auto}
+.homeStats{display:flex;align-items:center;gap:22px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:10px 26px;text-align:center;line-height:1.05}
+.homeStats small{display:block;font-size:13px;font-weight:600;color:var(--ink2)}
+.homeStats b{font-size:26px}
+.homeStats .sep{width:1px;height:36px;background:var(--line)}
+.playBtn{width:100%;border:0;border-radius:24px;background:var(--accent);color:#fff;padding:16px;box-shadow:0 5px 0 var(--accent2),0 8px 18px rgba(247,154,34,.35);cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.1}
+.playBtn span{font-size:32px;font-weight:700}
+.playBtn small{font-size:16px;font-weight:600;opacity:.95}
+.playBtn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--accent2)}
+.dailyBtn{width:100%;border:0;border-radius:22px;background:var(--card);box-shadow:var(--shadow);padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left}
+.dailyBtn:disabled{opacity:.6;cursor:default}
+.dailyBtn .cal{width:46px;height:46px;flex-shrink:0}
+.dailyBtn .dtxt{flex:1}
+.dailyBtn b{display:block;font-size:19px}
+.dailyBtn small{font-size:13px;font-weight:500;color:var(--ink2)}
+.dailyBtn .streak{font-weight:700;font-size:17px}
+.loading{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:8;font-weight:600}
+.loading.show{display:flex}
+.loading svg{width:80px;height:80px;animation:bounce 1s infinite}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translate(-50%,-220%);opacity:0;background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;font-weight:600;z-index:30;transition:transform .3s;max-width:90%;text-align:center;font-size:15px}
+.toast.show{transform:translate(-50%,0);opacity:1}
+.toast{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.toast img{width:36px;height:36px;object-fit:contain;margin:-6px 0}
+.foot{font-size:12px;color:var(--ink2);margin-top:12px}
+body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition:none!important}
+@media (max-height:720px){.logo{height:64px}.round{width:40px;height:40px}.stat b{font-size:20px}.tool .circ{width:52px;height:52px}.tool .circ svg{width:34px;height:34px}.rule svg{width:28px;height:28px}.rule{font-size:11px;padding:4px 6px}}
+@media (max-height:620px){.rules{display:none}}
+/* Toby mascot artwork adapted from the approved character sheet */
+.tobyHome{width:min(55%,205px);max-height:25vh;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(117,69,55,.18))}
+.panel img.mascot.tall{width:auto;height:120px}
+.homeMain{gap:12px}
+.homeLogo{max-height:105px;object-fit:contain}
+.tool .circ .toolToby{width:84%;height:84%;object-fit:contain}
+.panel img.mascot{object-fit:contain}
+@media(max-height:730px){.tobyHome{max-height:17vh}.homeMain{gap:8px}.homeLogo{max-height:75px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
+
+<div class="app">
+  <header>
+    <button class="round" id="btnLevels" aria-label="Back to home"><svg viewBox="0 0 24 24"><use href="#back"/></svg></button>
+    <div class="logo" id="logo"></div>
+    <button class="round" id="btnSettings" aria-label="Settings"><svg viewBox="0 0 24 24"><use href="#gear"/></svg></button>
+  </header>
+  <div class="stats">
+    <div class="stat"><small id="diffName">Level</small><b id="levelNum">1</b></div>
+    <div class="bones" id="bones" aria-label="Mistakes left"></div>
+    <div class="stat"><small>Score</small><b id="scoreNum">0</b></div>
+  </div>
+  <div class="rules" id="rules"></div>
+  <div class="boardArea" id="boardArea">
+    <div class="frame" id="frame">
+      <div class="strip" id="strip"></div>
+      <div class="grid" id="grid" role="grid" aria-label="Puzzle board"></div>
+    </div>
+    <div class="loading" id="loading"><svg viewBox="0 0 100 100"><use href="#bichon"/></svg>Fetching your puzzle…</div>
+  </div>
+  <div class="tools">
+    <button class="tool" id="btnFind"><span class="badge" id="findBadge">3</span><span class="circ"><img class="toolToby" src="toby/face-happy.png" alt=""></span>Find a Dog</button>
+    <button class="tool" id="btnHint"><span class="badge" id="hintBadge">3</span><span class="circ"><img class="toolToby" src="toby/act-hint.png" alt=""></span>Logic Hint</button>
+    <button class="tool" id="btnSniff"><span class="badge" id="sniffBadge">3</span><span class="circ"><img class="toolToby" src="toby/act-sniff.png" alt=""></span>Sniff Out</button>
+    <button class="tool" id="btnUndo"><span class="circ"><svg viewBox="0 0 48 48"><use href="#undo"/></svg></span>Undo</button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="hintCard" id="hintCard" role="dialog" aria-live="polite">
+  <div class="ht"><img src="toby/face-focused.png" alt="Toby thinking" style="width:48px;height:48px;flex-shrink:0"><p id="hintText"></p></div>
+  <div class="btnrow"><button class="btn" id="hintClose">Close</button><button class="btn primary" id="hintApply">Apply</button></div>
+</div>
+
+<div class="overlay" id="ovWin"><div class="panel">
+  <img class="mascot bounce" id="winToby" src="toby/act-complete.png" alt="Toby celebrating">
+  <h2>Paw-some!</h2><p id="winText"></p>
+  <div class="score-break" id="winBreak"></div>
+  <div class="btnrow"><button class="btn" id="winStay">Admire</button><button class="btn primary" id="winNext">Next level</button></div>
+</div></div>
+
+<div class="overlay" id="ovLose"><div class="panel">
+  <img class="mascot" src="toby/act-oops.png" alt="Toby lost a bone">
+  <h2>Out of bones!</h2><p>No harm done. Start this puzzle fresh, or carry on with one extra bone for half points.</p>
+  <div class="btnrow"><button class="btn" id="loseKeep">Keep going</button><button class="btn primary" id="loseRetry">Try again</button></div>
+</div></div>
+
+<div class="home show" id="home">
+  <div class="homeTop"><button class="round" id="homeHelp" aria-label="How to play"><span style="font-size:22px;font-weight:700;color:#754537">?</span></button>
+    <button class="round" id="homeSettings" aria-label="Settings"><svg viewBox="0 0 24 24"><use href="#gear"/></svg></button></div>
+  <div class="homeMain">
+    <img class="homeLogo" src="logo.png" alt="Sudogku">
+    <img class="tobyHome" src="toby-full.png" alt="Toby, the Sudogku mascot">
+    <div class="homeStats"><div><small>Score</small><b id="hScore">0</b></div><div class="sep"></div><div><small>Solved</small><b id="hSolved">0</b></div></div>
+    <button class="playBtn" id="homePlay"><span>Play</span><small id="hLevel">Level 1</small></button>
+    <button class="dailyBtn" id="homeDaily"><span class="cal" id="hCal"></span><span class="dtxt"><b>Daily puzzle</b><small id="hDailySub"></small></span><span class="streak" id="hStreak"></span></button>
+  </div>
+  <p class="foot">No ads. No tracking. Just dogs.</p>
+</div>
+
+<div class="overlay" id="ovHelp"><div class="panel">
+  <img class="mascot" src="toby/face-happy.png" alt="Toby">
+  <h2>How to play</h2>
+  <ul class="howto">
+    <li><span class="ic" id="hr1"></span><span>Place exactly <b>one dog</b> in every <b>row</b>, every <b>column</b> and every <b>colour</b>.</span></li>
+    <li><span class="ic" id="hr2"></span><span>Dogs need their space: they <b>can't touch</b>, not even corner to corner.</span></li>
+    <li><span class="ic"><svg viewBox="0 0 100 100"><use href="#bichon"/></svg></span><span>Every puzzle starts with <b>one dog already in place</b>. Use it to start crossing out.</span></li>
+    <li><span class="ic">👆</span><span><b id="hTap">Tap</b> a square to mark ✕ (no dog). <b id="hDbl">Double-tap</b> to place or remove a dog.</span></li>
+    <li><span class="ic">👉</span><span><b>Drag</b> across squares to mark lots of ✕s at once. Start a drag on a ✕ to rub them out.</span></li>
+    <li><span class="ic"><svg viewBox="0 0 60 30"><use href="#bone"/></svg></span><span>A dog in the right spot stays put. A dog in the wrong spot cracks a <b>bone</b> and turns into a red ✕. Lose all three bones and it's a do-over.</span></li>
+    <li><span class="ic"><svg viewBox="0 0 48 48"><use href="#bulb"/></svg></span><span><b>Logic Hint</b> explains the next step and highlights it. <b>Apply</b> does it for you, and Undo takes it back.</span></li>
+    <li><span class="ic"><svg viewBox="0 0 100 100"><use href="#bichon"/></svg></span><span><b>Find a Dog</b> places one dog. <b>Sniff Out</b> crosses out three empty squares. Each tool works <b>3 times</b> per puzzle. Reach level 21 to unlock a <b>daily puzzle</b>.</span></li>
+  </ul>
+  <div class="btnrow"><button class="btn primary" data-close>Let's go!</button></div>
+</div></div>
+
+<div class="overlay" id="ovSettings"><div class="panel">
+  <h2>Settings</h2>
+  <div id="toggles"></div>
+  <div class="toggle"><span>Placing dogs<small>Cycle mode: each tap goes ✕ → dog → empty.</small></span>
+    <div class="seg" id="tapSeg"><button data-v="double">Double-tap</button><button data-v="cycle">Cycle</button></div></div>
+  <div class="btnrow"><button class="btn" id="btnHow">How to play</button><button class="btn primary" id="btnRestart">Restart puzzle</button></div>
+  <div class="btnrow"><button class="btn" data-close>Done</button></div>
+  <p class="foot">No ads. No tracking. Just dogs.</p>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="engine.js"></script>
+<script>
+'use strict';
+const E = window.SudogkuEngine;
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('sudogku2.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('sudogku2.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+// ---------------- palette & art ----------------
+const PALETTE = ['#FFB675', '#F39AB9', '#B79BDE', '#BFE4A4', '#6ED4CB', '#85CFF2', '#F8D76A', '#EA817C', '#7398D6', '#DCC39C', '#C979A8'];
+const NAMES = ['Apricot', 'Rose', 'Lilac', 'Mint', 'Aqua', 'Sky', 'Butter', 'Coral', 'Denim', 'Sand', 'Berry'];
+const COCOA = '#754537', DARK = '#2b1a14';
+
+function mix(hex, to, t) {
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const a = p(hex), b = p(to);
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
+function furPuffs() {
+  const p = [];
+  for (let k = 0; k < 16; k++) {
+    const a = k / 16 * Math.PI * 2 - Math.PI / 2;
+    p.push([50 + Math.cos(a) * 33, 53 + Math.sin(a) * 31, k % 2 ? 11.5 : 13.5]);
+  }
+  p.push([39, 18, 11], [50, 14, 12.5], [61, 18, 11], [50, 54, 33]);
+  return p;
+}
+function circles(list, attrs) { return list.map(([x, y, r]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" ${attrs}/>`).join(''); }
+function buildDefs() {
+  const fur = furPuffs(), ears = [[15, 60, 14], [85, 60, 14]];
+  const face = `<g class="face">
+    <circle cx="31" cy="65" r="5" fill="#F7A8B8" opacity=".6"/><circle cx="69" cy="65" r="5" fill="#F7A8B8" opacity=".6"/>
+    <circle cx="39" cy="54" r="5.4" fill="${DARK}"/><circle cx="61" cy="54" r="5.4" fill="${DARK}"/>
+    <circle cx="40.7" cy="52.2" r="1.7" fill="#fff"/><circle cx="62.7" cy="52.2" r="1.7" fill="#fff"/>
+    <ellipse cx="50" cy="63.5" rx="5.2" ry="3.9" fill="${DARK}"/><ellipse cx="48.6" cy="62.4" rx="1.6" ry="1" fill="#fff" opacity=".6"/>
+    <path d="M46.6 70.5q3.4 7.5 6.8 0z" fill="#F27C93" stroke="${DARK}" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M50 66.8q0 4.2-4.8 4.4M50 66.8q0 4.2 4.8 4.4" fill="none" stroke="${DARK}" stroke-width="2.2" stroke-linecap="round"/></g>`;
+  const bichon = `<symbol id="bichon" viewBox="0 0 100 100"><image href="toby/face-happy.png" x="0" y="0" width="100" height="100"/></symbol>`;
+  const puff = `<symbol id="puff" viewBox="0 0 100 100">
+    ${circles(fur.concat(ears), `fill="${COCOA}" stroke="${COCOA}" stroke-width="7"`)}
+    ${circles(fur.concat(ears), 'fill="currentColor"')}</symbol>
+    <symbol id="puffface" viewBox="0 0 100 100"><g transform="translate(50 56) scale(.9) translate(-50 -56)">
+    <circle cx="39" cy="54" r="5.4" fill="${DARK}"/><circle cx="61" cy="54" r="5.4" fill="${DARK}"/>
+    <circle cx="40.7" cy="52.2" r="1.7" fill="#fff"/><circle cx="62.7" cy="52.2" r="1.7" fill="#fff"/>
+    <ellipse cx="50" cy="63.5" rx="5.2" ry="3.9" fill="${DARK}"/>
+    <path d="M46.6 70.5q3.4 7.5 6.8 0z" fill="#F27C93" stroke="${DARK}" stroke-width="1.6"/></g></symbol>`;
+  const boneShape = (fillAttrs) => `<circle cx="11" cy="10" r="8" ${fillAttrs}/><circle cx="11" cy="20" r="8" ${fillAttrs}/><circle cx="49" cy="10" r="8" ${fillAttrs}/><circle cx="49" cy="20" r="8" ${fillAttrs}/><rect x="11" y="9" width="38" height="12" rx="3" ${fillAttrs}/>`;
+  const bone = `<symbol id="bone" viewBox="0 0 60 30">${boneShape('fill="#A8671E" stroke="#A8671E" stroke-width="3.5"')}${boneShape('fill="#F7C548"')}
+    <path d="M14 7.5h3M45 7.5h-3M17 12.5h26" stroke="#FFE7A0" stroke-width="2.2" stroke-linecap="round"/></symbol>`;
+  const xmark = `<symbol id="xmark" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="4.2" stroke-linecap="round"/></symbol>`;
+  const icons = `
+    <symbol id="paw" viewBox="0 0 24 24"><g fill="${COCOA}"><ellipse cx="12" cy="15.5" rx="4.6" ry="3.9"/><circle cx="6.4" cy="10.4" r="2.1"/><circle cx="10" cy="6.8" r="2.1"/><circle cx="14" cy="6.8" r="2.1"/><circle cx="17.6" cy="10.4" r="2.1"/></g></symbol>
+    <symbol id="gear" viewBox="0 0 24 24"><path fill="${COCOA}" d="M10.3 2h3.4l.5 2.6 1.7.8 2.2-1.5 2.4 2.4-1.5 2.2.8 1.7 2.6.5v3.4l-2.6.5-.8 1.7 1.5 2.2-2.4 2.4-2.2-1.5-1.7.8-.5 2.6h-3.4l-.5-2.6-1.7-.8-2.2 1.5-2.4-2.4 1.5-2.2-.8-1.7L2 13.7v-3.4l2.6-.5.8-1.7-1.5-2.2 2.4-2.4 2.2 1.5 1.7-.8zM12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2z"/></symbol>
+    <symbol id="bulb" viewBox="0 0 48 48">
+      <g stroke="#F7B500" stroke-width="3" stroke-linecap="round"><path d="M24 2v4M8 9l3 3M40 9l-3 3M3 22h4M41 22h4"/></g>
+      <path d="M24 9c-7.5 0-13 5.6-13 12.6 0 4.6 2.4 7.6 4.6 10 1.4 1.5 2.2 3 2.2 4.6h12.4c0-1.6.8-3.1 2.2-4.6 2.2-2.4 4.6-5.4 4.6-10C37 14.6 31.5 9 24 9z" fill="#FFD84D" stroke="${COCOA}" stroke-width="2.6"/>
+      <path d="M19 22.5c0-3 2-5.5 5-5.5" stroke="#FFF6C8" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <rect x="18.5" y="37" width="11" height="4" rx="2" fill="#C7A27F" stroke="${COCOA}" stroke-width="2"/><rect x="19.5" y="41" width="9" height="4" rx="2" fill="#C7A27F" stroke="${COCOA}" stroke-width="2"/></symbol>
+    <symbol id="back" viewBox="0 0 24 24"><path d="M19 12H6M11 6l-6 6 6 6" fill="none" stroke="${COCOA}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="sniff" viewBox="0 0 48 48">
+      <path d="M8.5 13q-3 3.5 0 7M4.5 9.5q-5.5 7 0 14M9.5 28q-3 3.5 0 7" stroke="${COCOA}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M14 21c0-5.5 5.4-8.5 12-8.5S38 15.5 38 21c0 5.6-6 10.5-12 10.5S14 26.6 14 21z" fill="${DARK}"/>
+      <ellipse cx="21.2" cy="22.5" rx="2.6" ry="3.3" fill="#000" opacity=".6"/><ellipse cx="30.8" cy="22.5" rx="2.6" ry="3.3" fill="#000" opacity=".6"/>
+      <ellipse cx="23" cy="16.6" rx="4.4" ry="1.7" fill="#fff" opacity=".45"/>
+      <circle cx="38" cy="36" r="8" fill="#F79A22" stroke="#fff" stroke-width="2"/><path d="M34.8 32.8l6.4 6.4M41.2 32.8l-6.4 6.4" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></symbol>
+    <symbol id="undo" viewBox="0 0 48 48"><path d="M14 16h15a10 10 0 0 1 0 20H18" fill="none" stroke="${COCOA}" stroke-width="5" stroke-linecap="round"/><path d="M20 7l-9 9 9 9" fill="none" stroke="${COCOA}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></symbol>`;
+  $('defs').innerHTML = bichon + puff + bone + xmark + icons;
+}
+
+// Region patterns (one per palette slot): bone, paw, heart, grass, ball, bowl, star, flower, kennel, cloud, leaf
+function patternSVG(idx, col) {
+  const c = mix(col, '#5a2e20', .28), t = col;
+  const P = [
+    `<g transform="rotate(-35 12 12)" fill="${c}"><rect x="6" y="10" width="12" height="4" rx="2"/><circle cx="6" cy="10" r="2.6"/><circle cx="6" cy="14" r="2.6"/><circle cx="18" cy="10" r="2.6"/><circle cx="18" cy="14" r="2.6"/></g>`,
+    `<g fill="${c}"><ellipse cx="12" cy="15.5" rx="4.5" ry="3.8"/><circle cx="6.5" cy="10.5" r="2"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="7" r="2"/><circle cx="17.5" cy="10.5" r="2"/></g>`,
+    `<path fill="${c}" d="M12 20s-7-4.4-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.6 12 20 12 20z"/>`,
+    `<path fill="${c}" d="M5 20c0-6 1-9 3-12-1 4-1 8 0 12zM10 20c0-7 1.5-11 4-14-1.5 5-1.5 9-1 14zM15.5 20c.5-5 2-8 4-10-1.2 3.5-1.5 6.5-1.5 10z"/>`,
+    `<circle cx="12" cy="12" r="7" fill="${c}"/><path d="M7.4 7.6c2.2 2 2.2 6.8 0 8.8M16.6 7.6c-2.2 2-2.2 6.8 0 8.8" fill="none" stroke="${t}" stroke-width="1.4"/>`,
+    `<g fill="${c}"><path d="M4 12h16a8 6 0 0 1-16 0z"/><rect x="7" y="17.5" width="10" height="2" rx="1"/><circle cx="9" cy="10.4" r="1.4"/><circle cx="12" cy="9.6" r="1.4"/><circle cx="15" cy="10.4" r="1.4"/></g>`,
+    `<path fill="${c}" d="M12 4l2.4 5 5.4.6-4 3.7 1.1 5.3L12 16l-4.9 2.6 1.1-5.3-4-3.7 5.4-.6z"/>`,
+    `<g fill="${c}"><circle cx="12" cy="7" r="3"/><circle cx="16.8" cy="10.5" r="3"/><circle cx="15" cy="16" r="3"/><circle cx="9" cy="16" r="3"/><circle cx="7.2" cy="10.5" r="3"/></g><circle cx="12" cy="12" r="2.2" fill="${t}"/>`,
+    `<path fill="${c}" d="M12 4l8 6.5V20H4v-9.5z"/><path fill="${t}" d="M9.5 20v-4.5a2.5 2.5 0 0 1 5 0V20z"/>`,
+    `<path fill="${c}" d="M7 18a4 4 0 0 1-.6-8 5.5 5.5 0 0 1 10.6-1.2A4.2 4.2 0 0 1 17.5 18z"/>`,
+    `<path fill="${c}" d="M5 19C5 10 10 5 19 5c0 9-5 14-14 14z"/><path d="M6.5 17.5L15 9" stroke="${t}" stroke-width="1.3" stroke-linecap="round"/>`
+  ];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" opacity="OP">${P[idx]}</svg>`;
+}
+let patStyle = document.createElement('style'); document.head.appendChild(patStyle);
+function buildPatterns() {
+  const op = settings.highContrast ? '.75' : '.42';
+  patStyle.textContent = PALETTE.map((col, i) =>
+    `.tile.c${i}{background-color:${col};background-image:url("data:image/svg+xml,${encodeURIComponent(patternSVG(i, col).replace('OP', op))}")}`).join('\n');
+}
+function miniRule(kind) {
+  // 3x3 mini illustration for the rules bar
+  const cells = [];
+  for (let i = 0; i < 9; i++) {
+    const x = (i % 3) * 11 + 1, y = Math.floor(i / 3) * 11 + 1;
+    let fill = '#f1e3d3', mark = '';
+    if (kind === 1) fill = i === 4 ? '#B79BDE' : (i === 1 || i === 3 || i === 5 || i === 7 ? '#B79BDE' : '#f1e3d3');
+    const isX = kind === 1 ? [1, 3, 5, 7].includes(i) : kind === 2 ? [1, 3, 5, 7].includes(i) : i !== 4;
+    if (i === 4) mark = `<svg x="${x}" y="${y}" width="10" height="10" viewBox="0 0 100 100"><use href="#bichon"/></svg>`;
+    else if (isX) mark = `<path d="M${x + 2.5} ${y + 2.5}l5 5M${x + 7.5} ${y + 2.5}l-5 5" stroke="${COCOA}" stroke-width="1.6" stroke-linecap="round"/>`;
+    cells.push(`<rect x="${x}" y="${y}" width="10" height="10" rx="2.5" fill="${fill}"/>${mark}`);
+  }
+  return `<svg viewBox="0 0 34 34">${cells.join('')}</svg>`;
+}
+
+// ---------------- settings ----------------
+const reduceDefault = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+let settings = Object.assign({ music: false, sound: true, voice: true, vibration: true, patterns: true, reducedMotion: reduceDefault,
+  highContrast: false, bones: true, tapMode: 'double', rules: true }, store.get('settings', {}));
+const canVibrate = 'vibrate' in navigator;
+const TOGGLES = [
+  ['music', 'Music', 'Gentle background tune.'],
+  ['sound', 'Sound', 'Taps, chimes and celebrations.'],
+  ['voice', 'Dog voice', 'Happy yips when a dog finds its spot.'],
+  ['vibration', 'Vibration', canVibrate ? 'Buzz on mistakes.' : 'Not supported on this device (iPhone Safari blocks it).'],
+  ['patterns', 'Pattern mode', 'Little icons in each colour, handy for telling colours apart.'],
+  ['bones', 'Mistake bones', 'Wrong dogs crack a bone and turn into a red ✕. Off = relaxed play: dogs can be moved, no bonus points.'],
+  ['rules', 'Rules bar', 'The three rule cards above the board.'],
+  ['highContrast', 'High contrast', 'Stronger patterns and darker marks.'],
+  ['reducedMotion', 'Reduced motion', 'Turn off bouncing and wiggling.']
+];
+function applySettings() {
+  document.body.classList.toggle('nopat', !settings.patterns);
+  document.body.classList.toggle('hc', settings.highContrast);
+  document.body.classList.toggle('rm', settings.reducedMotion);
+  buildPatterns();
+  updateRulesBar();
+  music(settings.music);
+  $('hTap').textContent = settings.tapMode === 'cycle' ? 'Tap once' : 'Tap';
+  $('hDbl').textContent = settings.tapMode === 'cycle' ? 'Tap again' : 'Double-tap';
+}
+function saveSettings() { store.set('settings', settings); applySettings(); if (G) render(); }
+
+// ---------------- audio ----------------
+let ac = null;
+function audio() {
+  if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (ac.state === 'suspended') ac.resume().catch(() => {});
+  return ac;
+}
+function tone(f, dur, type, vol, when, f2) {
+  const a = audio(); if (!a) return;
+  const t = a.currentTime + (when || 0), o = a.createOscillator(), g = a.createGain();
+  o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol || .12, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + .02);
+}
+function yip(when) {
+  const a = audio(); if (!a || !settings.voice) return;
+  const t = a.currentTime + (when || 0);
+  [[1, .16], [2, .05]].forEach(([h, v]) => {
+    const o = a.createOscillator(), g = a.createGain(); o.type = 'triangle';
+    o.frequency.setValueAtTime(650 * h, t); o.frequency.exponentialRampToValueAtTime(1450 * h, t + .045); o.frequency.exponentialRampToValueAtTime(820 * h, t + .14);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + .17);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + .2);
+  });
+}
+const sfx = {
+  x() { settings.sound && tone(700, .05, 'triangle', .06); },
+  clear() { settings.sound && tone(420, .05, 'triangle', .05); },
+  dog() { settings.sound && (tone(660, .09, 'sine', .1), tone(990, .12, 'sine', .08, .06)); yip(.04); },
+  wrong() { settings.sound && tone(190, .3, 'sawtooth', .06, 0, 110); buzz(140); },
+  hint() { settings.sound && (tone(880, .15, 'sine', .07), tone(1320, .2, 'sine', .05, .08)); },
+  win() { if (settings.sound) [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .25, 'triangle', .09, i * .09)); yip(.5); yip(.72); }
+};
+function buzz(ms) { if (settings.vibration && canVibrate) try { navigator.vibrate(ms); } catch (e) {} }
+let musicTimer = null;
+function music(on) {
+  if (!on) { clearInterval(musicTimer); musicTimer = null; return; }
+  if (musicTimer || !ac) return; // starts after first interaction
+  const scale = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3];
+  let i = 2, beat = 0;
+  musicTimer = setInterval(() => {
+    if (document.hidden) return;
+    i = Math.max(0, Math.min(scale.length - 1, i + [-2, -1, 1, 1, 2, 0][Math.floor(Math.random() * 6)]));
+    if (Math.random() < .8) tone(scale[i], .9, 'sine', .035);
+    if (beat++ % 4 === 0) tone(scale[[0, 3, 4, 3][Math.floor(beat / 4) % 4]] / 2, 1.8, 'sine', .03);
+  }, 520);
+}
+document.addEventListener('pointerdown', () => { audio(); if (settings.music) music(true); }, { once: true });
+
+// ---------------- engine access (worker with fallback) ----------------
+let worker = null, seq = 0;
+const pending = {};
+try {
+  worker = new Worker('engine.js');
+  worker.onmessage = e => { const p = pending[e.data.id]; if (!p) return; delete pending[e.data.id]; e.data.error ? p.rej(e.data.error) : p.res(e.data.res); };
+  worker.onerror = () => { worker = null; for (const id in pending) { const p = pending[id]; delete pending[id]; try { p.res(E[p.cmd](...p.args)); } catch (err) { p.rej(err); } } };
+} catch (e) { worker = null; }
+function call(cmd, ...args) {
+  if (!worker) return new Promise(res => setTimeout(() => res(E[cmd](...args)), 20));
+  return new Promise((res, rej) => { const id = ++seq; pending[id] = { res, rej, cmd, args }; worker.postMessage({ id, cmd, args }); });
+}
+const puzzleCache = {};
+async function getPuzzle(kind, num) {
+  const key = 'v3_' + kind + '_' + num;
+  if (puzzleCache[key]) return puzzleCache[key];
+  const saved = store.get('puz_' + key, null);
+  if (saved) return (puzzleCache[key] = saved);
+  const p = await call('generateLevel', kind, num);
+  puzzleCache[key] = p; store.set('puz_' + key, p);
+  return p;
+}
+function prefetch(kind, num) { getPuzzle(kind, num).catch(() => {}); }
+
+// ---------------- game state ----------------
+let level = store.get('level', 1);
+let score = store.get('score', 0), solvedCount = store.get('solved', 0);
+let mode = store.get('mode', 'level'); // 'level' or 'daily'
+let daily = Object.assign({ done: {}, streak: 0, last: null, best: null }, store.get('daily', {}));
+let G = null; // current game
+const DAILY_UNLOCK = 21;
+
+function todayKey(d) { d = d || new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); }
+function keyDate(k) { return new Date(Math.floor(k / 10000), Math.floor(k / 100) % 100 - 1, k % 100); }
+function prettyDay(k) { return keyDate(k).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+
+function newGameFrom(p) {
+  const marks = new Array(p.n * p.n).fill(0);
+  (p.starters || []).forEach(i => { marks[i] = 2; });
+  return { kind: p.kind, key: p.key, n: p.n, regions: p.regions, sol: p.sol, colours: p.colours, tier: p.tier, requestedTier: p.requestedTier, difficultyMatched: p.difficultyMatched, starters: p.starters || [],
+    marks, history: [], bones: 3, finds: 0, hints: 0, sniffs: 0, red: [], continued: false, done: false, elapsed: 0 };
+}
+function saveGame() { if (G) store.set('game_' + G.kind, G); }
+async function loadGame(kind) {
+  mode = kind; store.set('mode', kind);
+  const key = kind === 'daily' ? todayKey() : level;
+  const saved = store.get('game_' + kind, null);
+  if (saved && saved.key === key && (kind === 'daily' || !saved.done)) { G = saved; render(); if (kind === 'level') prefetch('level', level + 1); return; }
+  $('loading').classList.add('show'); $('frame').style.visibility = 'hidden';
+  try { G = newGameFrom(await getPuzzle(kind, key)); }
+  finally { $('loading').classList.remove('show'); $('frame').style.visibility = ''; }
+  saveGame(); render(); if (kind === 'level') prefetch('level', level + 1);
+}
+
+const LIMIT = 3;
+const hintsLeft = () => Math.max(0, LIMIT - (G.hints || 0));
+const findsLeft = () => Math.max(0, LIMIT - (G.finds || 0));
+const sniffsLeft = () => Math.max(0, LIMIT - (G.sniffs || 0));
+const isStarter = i => !!(G.starters && G.starters.includes(i));
+const isRed = i => !!(G.red && G.red.includes(i));
+const isSol = i => G.sol[Math.floor(i / G.n)] === i % G.n;
+function attacks(i, j) {
+  const n = G.n, y1 = Math.floor(i / n), x1 = i % n, y2 = Math.floor(j / n), x2 = j % n;
+  return y1 === y2 || x1 === x2 || G.regions[i] === G.regions[j] || (Math.abs(y1 - y2) <= 1 && Math.abs(x1 - x2) <= 1);
+}
+function bonesActive() { return settings.bones; }
+function clashes() {
+  const dogs = [], bad = new Set();
+  G.marks.forEach((m, i) => { if (m === 2) dogs.push(i); });
+  for (let a = 0; a < dogs.length; a++) for (let b = a + 1; b < dogs.length; b++) if (attacks(dogs[a], dogs[b])) { bad.add(dogs[a]); bad.add(dogs[b]); }
+  return bad;
+}
+
+// ---------------- rendering ----------------
+let tiles = [], heads = [];
+function layout() {
+  if (!G) return;
+  const area = $('boardArea'), n = G.n, pad = 16;
+  const gap = Math.max(2, Math.round(7 - n * 0.4));
+  const availW = area.clientWidth - pad, availH = area.clientHeight - pad - 6;
+  // board side s, strip height ≈ (s/n)*0.78
+  const s = Math.floor(Math.min(availW, availH - Math.min(46, availW / n * 0.8)));
+  const tile = (s - gap * (n - 1)) / n;
+  const gr = $('grid');
+  gr.style.width = gr.style.height = s + 'px';
+  gr.style.setProperty('--tile', tile + 'px');
+  $('frame').style.setProperty('--gap', gap + 'px');
+  $('strip').style.width = s + 'px';
+}
+function buildBoard() {
+  const n = G.n, gr = $('grid'), st = $('strip');
+  gr.style.gridTemplateColumns = gr.style.gridTemplateRows = `repeat(${n},minmax(0,1fr))`;
+  st.style.gridTemplateColumns = `repeat(${n},minmax(0,1fr))`;
+  gr.innerHTML = ''; st.innerHTML = '';
+  tiles = []; heads = [];
+  for (let i = 0; i < n * n; i++) {
+    const d = document.createElement('div');
+    const col = G.colours[G.regions[i]];
+    d.className = 'tile c' + col;
+    d.dataset.i = i;
+    d.setAttribute('role', 'gridcell');
+    gr.appendChild(d); tiles.push(d);
+  }
+  for (let r = 0; r < n; r++) {
+    const h = document.createElement('div');
+    h.className = 'head';
+    h.innerHTML = `<svg viewBox="0 0 100 100" style="color:${PALETTE[G.colours[r]]}"><use href="#puff"/><use class="face" href="#puffface"/></svg>`;
+    h.title = NAMES[G.colours[r]];
+    st.appendChild(h); heads.push(h);
+  }
+  // order heads by palette appearance left-to-right like a legend (sorted by first appearance in reading order)
+  const order = [];
+  G.regions.forEach(r => { if (!order.includes(r)) order.push(r); });
+  order.forEach(r => st.appendChild(heads[r]));
+  layout();
+}
+let builtFor = null;
+function render() {
+  if (builtFor !== G) { buildBoard(); builtFor = G; }
+  paint();
+  $('diffName').textContent = G.kind === 'daily' ? 'Daily' : 'Level';
+  $('levelNum').textContent = G.kind === 'daily' ? prettyDay(G.key) : G.key;
+  $('scoreNum').textContent = score.toLocaleString();
+  renderBones();
+}
+function paint() {
+  const bad = clashes(), n = G.n, active = bonesActive();
+  const regionHasGoodDog = new Array(n).fill(false);
+  tiles.forEach((d, i) => {
+    const m = G.marks[i];
+    const red = m === 1 && isRed(i);
+    const want = m === 2 ? 'dog' : m === 1 ? (red ? 'rx' : 'x') : '';
+    if (d.dataset.show !== want) {
+      d.dataset.show = want;
+      d.innerHTML = want === 'dog' ? '<img class="dog" src="toby/tile.png" alt="">'
+        : want === 'x' ? `<svg class="x" viewBox="0 0 24 24" style="color:${settings.highContrast ? '#3b2219' : '#fff'}"><use href="#xmark"/></svg>`
+        : want === 'rx' ? '<svg class="x red" viewBox="0 0 24 24" style="color:#EE6A3A"><use href="#xmark"/></svg>' : '';
+    }
+    const wrong = m === 2 && active && !isSol(i);
+    d.classList.toggle('wrong', wrong);
+    d.classList.toggle('clash', m === 2 && !wrong && bad.has(i));
+    if (m === 2 && !wrong && !bad.has(i)) regionHasGoodDog[G.regions[i]] = true;
+    const y = Math.floor(i / n), x = i % n;
+    d.setAttribute('aria-label', `Row ${y + 1}, column ${x + 1}, ${NAMES[G.colours[G.regions[i]]]}, ${m === 2 ? 'dog' : red ? 'wrong guess, crossed out' : m === 1 ? 'crossed out' : 'empty'}`);
+  });
+  heads.forEach((h, r) => h.classList.toggle('solved', regionHasGoodDog[r]));
+  $('btnUndo').disabled = !G.history.length || G.done;
+  $('btnHint').disabled = G.done || !hintsLeft();
+  $('btnFind').disabled = G.done || !findsLeft();
+  $('btnSniff').disabled = G.done || !sniffsLeft();
+  $('sniffBadge').textContent = sniffsLeft(); $('sniffBadge').classList.toggle('empty', !sniffsLeft());
+  $('hintBadge').textContent = hintsLeft(); $('hintBadge').classList.toggle('empty', !hintsLeft());
+  $('findBadge').textContent = findsLeft(); $('findBadge').classList.toggle('empty', !findsLeft());
+}
+function renderBones() {
+  const b = $('bones');
+  if (!bonesActive()) { b.className = 'bones relaxed'; b.textContent = '😌 Relaxed'; return; }
+  b.className = 'bones';
+  b.innerHTML = [0, 1, 2].map(k => `<svg viewBox="0 0 60 30" class="${k < G.bones ? '' : 'cracked'}"><use href="#bone"/></svg>`).join('');
+}
+function updateRulesBar() {
+  $('rules').classList.toggle('hide', !settings.rules);
+}
+
+// ---------------- moves & history ----------------
+// apply a list of [cell, value] as ONE undo step
+function commit(changes, opts) {
+  opts = opts || {};
+  if (G.done) return null;
+  const entry = [];
+  let placedDogs = [];
+  for (const [i, v] of changes) {
+    if (G.marks[i] === v) continue;
+    entry.push([i, G.marks[i]]);
+    if (v === 2) placedDogs.push(i);
+    G.marks[i] = v;
+  }
+  if (!entry.length) return null;
+  G.history.push(entry);
+  paint();
+  // feedback
+  if (placedDogs.length) {
+    const wrongOnes = bonesActive() ? placedDogs.filter(i => !isSol(i)) : [];
+    placedDogs.forEach(i => { tiles[i].classList.remove('pop'); void tiles[i].offsetWidth; tiles[i].classList.add('pop'); });
+    if (wrongOnes.length && !opts.noPenalty) {
+      wrongOnes.forEach(i => { const t = tiles[i]; t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake'); });
+      loseBone();
+      const game = G;
+      setTimeout(() => {
+        if (G !== game) return;
+        wrongOnes.forEach(i => { if (G.marks[i] === 2) { G.marks[i] = 1; if (!G.red) G.red = []; if (!G.red.includes(i)) G.red.push(i); } });
+        paint(); saveGame();
+      }, 650);
+    } else sfx.dog();
+  } else if (!opts.silent) {
+    entry.some(([i]) => G.marks[i] === 1) ? sfx.x() : sfx.clear();
+  }
+  saveGame();
+  checkWin();
+  return entry;
+}
+function loseBone() {
+  sfx.wrong();
+  G.bones = Math.max(0, G.bones - 1);
+  renderBones();
+  const svgs = $('bones').querySelectorAll('svg');
+  if (svgs[G.bones]) { svgs[G.bones].classList.add('cracking'); }
+  saveGame();
+  if (G.bones <= 0) setTimeout(() => show('ovLose'), 650);
+  else toast(G.bones === 1 ? 'Oops! Last bone left' : 'Oops! A bone cracked', 'face-sorry');
+}
+function undo() {
+  const e = G.history.pop(); if (!e) return;
+  for (let k = e.length - 1; k >= 0; k--) { if (isStarter(e[k][0])) continue; G.marks[e[k][0]] = e[k][1]; if (G.red) G.red = G.red.filter(c => c !== e[k][0]); }
+  sfx.clear(); paint(); saveGame();
+}
+function checkWin() {
+  const n = G.n;
+  if (G.marks.filter(m => m === 2).length !== n || clashes().size) return;
+  if (!G.marks.every((m, i) => m !== 2 || isSol(i))) return;
+  G.done = true;
+  const base = Math.round(n * 10 * (1 + (Math.max(1, G.tier) - 1) * 0.5));
+  const lines = [['Puzzle (' + n + '×' + n + ')', base]];
+  let total = base;
+  if (settings.bones && !G.continued) { const b = Math.round(base * .2 * G.bones); lines.push(['Bones left × ' + G.bones, b]); total += b; }
+  if (G.continued) { const cut = -Math.round(base / 2); lines.push(['Extra bone used', cut]); total += cut; }
+  if (G.finds) { const f = -Math.round(base * .2 * G.finds); lines.push(['Find a Dog × ' + G.finds, f]); total += f; }
+  total = Math.max(Math.round(base * .1), total);
+  score += total; solvedCount++;
+  store.set('score', score); store.set('solved', solvedCount);
+  let extra = '';
+  if (G.kind === 'level') { level = G.key + 1; store.set('level', level); }
+  else {
+    const y = new Date(keyDate(G.key)); y.setDate(y.getDate() - 1);
+    daily.streak = daily.last === todayKey(y) ? daily.streak + 1 : 1;
+    daily.last = G.key; daily.done[G.key] = true;
+    const newBest = daily.best == null || G.elapsed < daily.best;
+    if (newBest) daily.best = G.elapsed;
+    store.set('daily', daily);
+    extra = ` Streak: ${daily.streak} day${daily.streak === 1 ? '' : 's'} 🔥` + (newBest ? ' New best time!' : '');
+  }
+  saveGame(); paint();
+  $('scoreNum').textContent = score.toLocaleString();
+  sfx.win();
+  $('winText').textContent = (G.kind === 'daily' ? `Daily puzzle for ${prettyDay(G.key)} done` : `Level ${G.key} done`) + ` in ${fmtTime(G.elapsed)}` + (!G.hints && !G.finds ? ', all by yourself!' : '.') + extra;
+  $('winNext').textContent = G.kind === 'daily' ? 'Home' : 'Next level';
+  $('winToby').src = G.kind === 'daily' ? 'toby/face-excited.png' : 'toby/act-complete.png';
+  if (G.kind === 'level' && G.key + 1 === DAILY_UNLOCK) setTimeout(() => toast('Daily puzzles unlocked! Find them on the home screen 🐾'), 2500);
+  $('winBreak').innerHTML = lines.map(([k, v]) => `<div><span>${k}</span><span>${v > 0 ? '+' : ''}${v}</span></div>`).join('') + `<div class="tot"><span>Total</span><span>+${total}</span></div>`;
+  if (solvedCount === 5 && settings.rules) { settings.rules = false; store.set('settings', settings); updateRulesBar(); setTimeout(() => toast('Rules bar tucked away. Bring it back in Settings.'), 1800); }
+  setTimeout(() => show('ovWin'), 700);
+}
+
+// ---------------- input: tap = ✕, double-tap = dog, drag = many ✕ ----------------
+let gest = null, lastTap = { i: -1, t: 0, entry: null };
+function cellAt(e) {
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const t = el && el.closest ? el.closest('.tile') : null;
+  return t && t.parentNode === $('grid') ? +t.dataset.i : null;
+}
+const grid = $('grid');
+grid.addEventListener('pointerdown', e => {
+  if (!G || G.done || document.body.classList.contains('hinting')) return;
+  const i = cellAt(e); if (i == null) return;
+  e.preventDefault();
+  try { grid.setPointerCapture(e.pointerId); } catch (err) {}
+  gest = { i0: i, moved: false, val: null, entry: [], seen: new Set([i]) };
+});
+grid.addEventListener('pointermove', e => {
+  if (!gest) return;
+  const i = cellAt(e); if (i == null) return;
+  if (!gest.moved) {
+    if (i === gest.i0) return;
+    gest.moved = true;
+    gest.val = G.marks[gest.i0] === 1 && !isRed(gest.i0) ? 0 : 1;
+    paintDrag(gest.i0);
+  }
+  if (!gest.seen.has(i)) { gest.seen.add(i); paintDrag(i); }
+});
+function paintDrag(i) {
+  const m = G.marks[i];
+  if (m === 2 || m === gest.val || isRed(i)) return;
+  gest.entry.push([i, m]); G.marks[i] = gest.val;
+  const d = tiles[i]; d.dataset.show = '_'; // force repaint of this tile
+  paint(); gest.val ? sfx.x() : sfx.clear();
+}
+function endGesture() {
+  if (!gest) return;
+  const g = gest; gest = null;
+  if (g.moved) { if (g.entry.length) { G.history.push(g.entry); saveGame(); paint(); } lastTap = { i: -1 }; return; }
+  tap(g.i0);
+}
+grid.addEventListener('pointerup', endGesture);
+grid.addEventListener('pointercancel', () => { if (gest && gest.moved && gest.entry.length) { G.history.push(gest.entry); saveGame(); } gest = null; });
+grid.addEventListener('contextmenu', e => e.preventDefault());
+grid.addEventListener('dblclick', e => e.preventDefault());
+
+function tap(i) {
+  const m = G.marks[i];
+  if (isRed(i)) return; // a known wrong spot stays crossed out
+  if (settings.tapMode === 'cycle') { if (m === 2 && (isStarter(i) || bonesActive())) return; commit([[i, (m + 1) % 3]]); return; }
+  const now = performance.now();
+  if (lastTap.i === i && now - lastTap.t < 330) {
+    // double tap: undo the first tap's ✕ (if it made one), then toggle the dog, as one step
+    if (lastTap.entry && G.history[G.history.length - 1] === lastTap.entry) {
+      G.history.pop();
+      for (const [c, v] of lastTap.entry) G.marks[c] = v;
+    }
+    const before = G.marks[i];
+    lastTap = { i: -1, t: 0, entry: null };
+    commit([[i, before === 2 ? 0 : 2]]);
+    if (before !== 2 && G.marks[i] !== 2) paint();
+    return;
+  }
+  if (m === 2) { lastTap = (isStarter(i) || bonesActive()) ? { i: -1 } : { i, t: now, entry: null }; return; } // dogs that are confirmed stay put
+  const entry = commit([[i, m === 1 ? 0 : 1]]);
+  lastTap = { i, t: now, entry };
+}
+
+// ---------------- tools ----------------
+$('btnUndo').onclick = undo;
+// Sniff Out: marks up to three squares that can't hold a dog, as one undoable move. 3 uses per puzzle.
+$('btnSniff').onclick = () => {
+  if (!G || G.done || !sniffsLeft()) return;
+  const picks = E.sniffCells(G.n, G.regions, G.sol, G.marks, 3, E.hashSeed(G.kind, G.key, G.history.length, G.sniffs || 0));
+  if (!picks.length) { toast('Nothing left to sniff out!'); return; }
+  G.sniffs = (G.sniffs || 0) + 1;
+  commit(picks.map(i => [i, 1]), { noPenalty: true });
+  picks.forEach(i => { const t = tiles[i]; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('sniffed'); setTimeout(() => t.classList.remove('sniffed'), 900); });
+  toast(`Sniffed out ${picks.length} empty square${picks.length === 1 ? '' : 's'}`, 'act-sniff');
+};
+
+$('btnFind').onclick = () => {
+  if (G.done || !findsLeft()) return;
+  const n = G.n;
+  const rows = [...Array(n).keys()].filter(y => G.marks[y * n + G.sol[y]] !== 2);
+  if (!rows.length) return;
+  const y = rows[Math.floor(Math.random() * rows.length)];
+  G.finds++;
+  commit([[y * n + G.sol[y], 2]]);
+  toast(findsLeft() ? `Found one! ${findsLeft()} left` : 'Found one! That was your last', 'face-cheeky');
+};
+let curHint = null;
+$('btnHint').onclick = async () => {
+  if (G.done || !hintsLeft()) return;
+  $('btnHint').disabled = true;
+  let h = null;
+  try { h = await call('playerHint', G.n, G.regions, G.sol, G.marks); } finally { paint(); }
+  if (h && h.kind !== 'stuck') { G.hints++; saveGame(); paint(); }
+  showHint(h);
+};
+function fmtUnits(type, ids) {
+  ids = ids.map(Number);
+  const one = k => type === 'R' ? `<span class="cname" style="background:${PALETTE[G.colours[k]]}">${NAMES[G.colours[k]]}</span>` : String(k + 1);
+  const parts = ids.map(one);
+  const joined = parts.length > 1 ? parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1] : parts[0];
+  if (type === 'R') return joined;
+  const word = type === 'r' ? 'row' : 'column';
+  return (ids.length > 1 ? word + 's ' : word + ' ') + joined;
+}
+function fmtHint(text) {
+  let s = text.replace(/\{(R|r|c)(L?):([\d,]+)\}/g, (_, t, l, ids) => fmtUnits(t, ids.split(',')));
+  if (/^(row|column)/.test(s)) s = s[0].toUpperCase() + s.slice(1);
+  return s;
+}
+function showHint(h) {
+  clearHint();
+  curHint = h;
+  if (!h || h.kind === 'stuck') {
+    $('hintText').textContent = 'No neat step found from here. Try Find a Dog, or Undo back a few moves.';
+    $('hintApply').classList.add('hide');
+  } else {
+    $('hintText').innerHTML = fmtHint(h.text);
+    $('hintApply').classList.remove('hide');
+    $('hintApply').textContent = h.action === 'dog' ? 'Place dog' : h.action === 'clear' ? 'Clear it' : (h.targets.length > 1 ? `Apply (${h.targets.length} ✕)` : 'Apply ✕');
+    h.premise.forEach(i => tiles[i] && tiles[i].classList.add('hl-p'));
+    h.targets.forEach(i => tiles[i] && tiles[i].classList.add('hl-t'));
+  }
+  document.body.classList.add('hinting');
+  sfx.hint();
+}
+function clearHint() {
+  document.body.classList.remove('hinting');
+  tiles.forEach(t => t.classList.remove('hl-t', 'hl-p'));
+  curHint = null;
+}
+$('hintClose').onclick = clearHint;
+$('scrim').onclick = clearHint;
+$('hintApply').onclick = () => {
+  const h = curHint; clearHint();
+  if (!h) return;
+  const v = h.action === 'x' ? 1 : h.action === 'dog' ? 2 : 0;
+  commit(h.targets.map(t => [t, v]), { noPenalty: true });
+};
+
+// ---------------- overlays ----------------
+function show(id) { $(id).classList.add('show'); }
+function hide(id) { $(id).classList.remove('show'); }
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => b.closest('.overlay').classList.remove('show'));
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o && o.id !== 'ovLose') o.classList.remove('show'); }));
+$('winNext').onclick = () => { hide('ovWin'); if (G.kind === 'daily') showHome(); else loadGame('level'); };
+$('winStay').onclick = () => hide('ovWin');
+$('loseRetry').onclick = () => { hide('ovLose'); restartGame(); };
+$('loseKeep').onclick = () => { hide('ovLose'); G.bones = 1; G.continued = true; saveGame(); render(); };
+function restartGame() {
+  G.marks.fill(0); (G.starters || []).forEach(i => { G.marks[i] = 2; }); G.history = []; G.bones = 3; G.finds = 0; G.hints = 0; G.sniffs = 0; G.red = []; G.continued = false; G.done = false; G.elapsed = 0;
+  saveGame(); render();
+}
+let toastTimer;
+function toast(msg, img) { const t = $('toast'); t.innerHTML = (img ? `<img src="toby/${img}.png" alt="">` : '') + '<span></span>'; t.querySelector('span').textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600); }
+
+function calIcon(day, locked) {
+  return `<svg viewBox="0 0 46 46"><rect x="3" y="6" width="40" height="37" rx="9" fill="#fff" stroke="${COCOA}" stroke-width="2.5"/><path d="M3 15a9 9 0 0 1 9-9h22a9 9 0 0 1 9 9v2H3z" fill="#F79A22"/><rect x="12" y="2" width="4" height="9" rx="2" fill="${COCOA}"/><rect x="30" y="2" width="4" height="9" rx="2" fill="${COCOA}"/>
+    <text x="23" y="36" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="700" font-size="16" fill="${COCOA}">${locked ? '🔒' : day}</text></svg>`;
+}
+function dailyUnlocked() { return level >= DAILY_UNLOCK || Object.keys(daily.done).length > 0; }
+function showHome() {
+  clearHint();
+  $('hScore').textContent = score.toLocaleString();
+  $('hSolved').textContent = solvedCount;
+  $('hLevel').textContent = 'Level ' + level;
+  const today = todayKey(), unlocked = dailyUnlocked();
+  $('homeDaily').disabled = !unlocked;
+  $('hCal').innerHTML = calIcon(new Date().getDate(), !unlocked);
+  $('hDailySub').textContent = !unlocked ? `Unlocks after level ${DAILY_UNLOCK - 1}` : daily.done[today] ? `Done for today ✓ · best ${daily.best != null ? fmtTime(daily.best) : '–'}` : `A new puzzle every day · best ${daily.best != null ? fmtTime(daily.best) : '–'}`;
+  const streak = daily.last === today || daily.last === todayKey(new Date(Date.now() - 864e5)) ? daily.streak : 0;
+  $('hStreak').textContent = unlocked ? '🔥 ' + streak : '';
+  $('home').classList.add('show');
+}
+function hideHome() { $('home').classList.remove('show'); }
+$('btnLevels').onclick = showHome;
+$('homePlay').onclick = () => { hideHome(); if (!G || G.kind !== 'level' || G.key !== level) loadGame('level'); };
+$('homeDaily').onclick = () => { hideHome(); loadGame('daily'); };
+$('homeHelp').onclick = () => show('ovHelp');
+$('homeSettings').onclick = () => $('btnSettings').onclick();
+
+function fmtTime(s) { s = Math.floor(s || 0); const m = Math.floor(s / 60); return m + ':' + String(s % 60).padStart(2, '0'); }
+setInterval(() => {
+  if (G && !G.done && !document.hidden && !document.querySelector('.overlay.show') && !$('home').classList.contains('show') && !document.body.classList.contains('hinting')) {
+    G.elapsed = (G.elapsed || 0) + 1; if (G.elapsed % 5 === 0) saveGame();
+  }
+}, 1000);
+
+function buildSettings() {
+  $('toggles').innerHTML = TOGGLES.map(([k, label, sub]) =>
+    `<label class="toggle"><span>${label}<small>${sub}</small></span><span class="sw"><input type="checkbox" data-k="${k}" ${settings[k] ? 'checked' : ''} ${k === 'vibration' && !canVibrate ? 'disabled' : ''}><span></span></span></label>`).join('');
+  $('toggles').querySelectorAll('input').forEach(inp => inp.onchange = () => {
+    settings[inp.dataset.k] = inp.checked;
+    if (inp.dataset.k === 'music' && inp.checked) audio();
+    saveSettings();
+  });
+  $('tapSeg').querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.v === settings.tapMode); b.onclick = () => { settings.tapMode = b.dataset.v; saveSettings(); buildSettings(); }; });
+}
+$('btnSettings').onclick = () => { buildSettings(); resetRestartBtn(); show('ovSettings'); };
+$('btnHow').onclick = () => { hide('ovSettings'); show('ovHelp'); };
+let restartArmed = false, restartTimer;
+function resetRestartBtn() { restartArmed = false; $('btnRestart').textContent = 'Restart puzzle'; }
+$('btnRestart').onclick = () => {
+  if (!restartArmed) { restartArmed = true; $('btnRestart').textContent = 'Tap again to confirm'; clearTimeout(restartTimer); restartTimer = setTimeout(resetRestartBtn, 3000); return; }
+  resetRestartBtn(); hide('ovSettings'); clearHint(); restartGame(); toast('Fresh start on this puzzle');
+};
+
+// ---------------- boot ----------------
+buildDefs();
+$('logo').innerHTML = '<img src="logo.png" alt="Sudogku">';
+{
+  const paw = (x, y, rot, sc) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})" fill="#E9C9B6"><ellipse cx="0" cy="5" rx="7" ry="6"/><circle cx="-8" cy="-3" r="3.2"/><circle cx="-3" cy="-8.5" r="3.2"/><circle cx="3" cy="-8.5" r="3.2"/><circle cx="8" cy="-3" r="3.2"/></g>`;
+  const tile = `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220">${paw(40, 40, -20, 1.2)}${paw(170, 70, 25, 1)}${paw(90, 170, 10, 1.1)}</svg>`;
+  document.documentElement.style.setProperty('--paws', `url("data:image/svg+xml,${encodeURIComponent(tile)}")`);
+}
+$('rules').innerHTML = [[1, '1 dog per colour'], [2, '1 dog per row &amp; column'], [3, "Dogs can't touch"]].map(([k, t]) => `<div class="rule">${miniRule(k)}<span>${t}</span></div>`).join('');
+$('hr1').innerHTML = miniRule(2); $('hr2').innerHTML = miniRule(3);
+applySettings();
+new ResizeObserver(layout).observe($('boardArea'));
+window.addEventListener('resize', layout);
+document.addEventListener('gesturestart', e => e.preventDefault());
+if (!store.get('seenHelp', false)) { store.set('seenHelp', true); setTimeout(() => show('ovHelp'), 400); }
+showHome();
+loadGame('level');
+
+try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
+</script>
+</body>
+</html>
